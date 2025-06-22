@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Criticality Assessment</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .eca-container * {
+            box-sizing: border-box;
+        }
+        .eca-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        .eca-fade-in {
+            animation: ecaFadeIn 0.3s ease-in;
+        }
+        @keyframes ecaFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .eca-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .eca-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        .eca-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+        }
+        .eca-tier-critical { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .eca-tier-high { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .eca-tier-medium { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .eca-tier-low { background: linear-gradient(135deg, #10b981, #059669); }
+        .eca-progress {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .eca-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        .eca-table {
+            min-height: 400px;
+            max-height: 600px;
+            overflow: auto;
+        }
+        .eca-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .eca-grid-mobile {
+                grid-template-columns: 1fr;
+            }
+            .eca-table {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="eca-container w-full max-w-7xl mx-auto p-4">
+        <!-- Compact Header -->
+        <div class="eca-card p-4 mb-6">
+            <div class="flex items-center justify-between flex-wrap">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 eca-btn-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-cogs text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">Equipment Criticality Assessment</h1>
+                        <p class="text-sm text-gray-600">ISO-Aligned Asset Management & Maintenance Planning</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2 mt-2 md:mt-0">
+                    <button id="ecaImportBtn" class="eca-btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                        <i class="fas fa-upload mr-2"></i>Import Assets
+                    </button>
+                    <button id="ecaExportBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                        <i class="fas fa-download mr-2"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="eca-card mb-6">
+            <div class="flex border-b overflow-x-auto">
+                <button class="eca-tab-btn px-6 py-3 text-sm font-medium border-b-2 border-blue-500 text-blue-600" data-tab="dashboard">
+                    <i class="fas fa-chart-pie mr-2"></i>Dashboard
+                </button>
+                <button class="eca-tab-btn px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700" data-tab="assets">
+                    <i class="fas fa-list mr-2"></i>Assets
+                </button>
+                <button class="eca-tab-btn px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700" data-tab="assessment">
+                    <i class="fas fa-clipboard-check mr-2"></i>Assessment
+                </button>
+                <button class="eca-tab-btn px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700" data-tab="settings">
+                    <i class="fas fa-cog mr-2"></i>Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="ecaTabDashboard" class="eca-tab-content">
+            <div class="eca-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-6">
+                <!-- Stats Cards -->
+                <div class="eca-card p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Total Assets</p>
+                            <p id="ecaTotalAssets" class="text-2xl font-bold text-gray-800">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-industrial text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="eca-card p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Critical Assets</p>
+                            <p id="ecaCriticalAssets" class="text-2xl font-bold text-red-600">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="eca-card p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Avg. Score</p>
+                            <p id="ecaAvgScore" class="text-2xl font-bold text-green-600">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="eca-card p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Est. Impact</p>
+                            <p id="ecaEstImpact" class="text-2xl font-bold text-purple-600">$0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="eca-grid grid-cols-1 lg:grid-cols-2 mb-6">
+                <!-- Criticality Distribution -->
+                <div class="eca-card p-6">
+                    <h3 class="text-lg font-semibold mb-4">Criticality Distribution</h3>
+                    <div style="height: 300px;">
+                        <canvas id="ecaCriticalityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Impact Analysis -->
+                <div class="eca-card p-6">
+                    <h3 class="text-lg font-semibold mb-4">Impact Analysis</h3>
+                    <div style="height: 300px;">
+                        <canvas id="ecaImpactChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Summary -->
+            <div class="eca-card p-6">
+                <h3 class="text-lg font-semibold mb-4">Maintenance Action Summary</h3>
+                <div class="eca-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                    <div class="text-center p-4">
+                        <div class="w-16 h-16 eca-tier-critical rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800">Tier 1 - Critical</h4>
+                        <p class="text-sm text-gray-600 mt-2">24/7 Monitoring, PdM Programs, Redundancy Analysis</p>
+                        <span id="ecaTier1Count" class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">0 Assets</span>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-16 h-16 eca-tier-high rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-tools text-white text-xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800">Tier 2 - High</h4>
+                        <p class="text-sm text-gray-600 mt-2">Risk-based Inspections, Scheduled PdM</p>
+                        <span id="ecaTier2Count" class="inline-block mt-2 px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">0 Assets</span>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-16 h-16 eca-tier-medium rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-wrench text-white text-xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800">Tier 3 - Medium</h4>
+                        <p class="text-sm text-gray-600 mt-2">Standard PM, Basic Monitoring</p>
+                        <span id="ecaTier3Count" class="inline-block mt-2 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">0 Assets</span>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-16 h-16 eca-tier-low rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-clock text-white text-xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800">Tier 4 - Low</h4>
+                        <p class="text-sm text-gray-600 mt-2">Run-to-Failure, Safety Checks</p>
+                        <span id="ecaTier4Count" class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">0 Assets</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assets Tab -->
+        <div id="ecaTabAssets" class="eca-tab-content hidden">
+            <div class="eca-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Asset Inventory</h3>
+                    <div class="flex space-x-2">
+                        <button id="ecaAddAssetBtn" class="eca-btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-plus mr-2"></i>Add Asset
+                        </button>
+                        <button id="ecaBulkActionsBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">
+                            <i class="fas fa-tasks mr-2"></i>Bulk Actions
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div class="eca-grid grid-cols-1 md:grid-cols-4 mb-4">
+                    <input type="text" id="ecaSearchAssets" placeholder="Search assets..." class="px-3 py-2 border rounded-lg text-sm">
+                    <select id="ecaFilterType" class="px-3 py-2 border rounded-lg text-sm">
+                        <option value="">All Types</option>
+                        <option value="Rotating">Rotating</option>
+                        <option value="Fixed">Fixed</option>
+                        <option value="Mobile">Mobile</option>
+                        <option value="Electrical">Electrical</option>
+                    </select>
+                    <select id="ecaFilterLocation" class="px-3 py-2 border rounded-lg text-sm">
+                        <option value="">All Locations</option>
+                    </select>
+                    <select id="ecaFilterTier" class="px-3 py-2 border rounded-lg text-sm">
+                        <option value="">All Tiers</option>
+                        <option value="1">Tier 1 - Critical</option>
+                        <option value="2">Tier 2 - High</option>
+                        <option value="3">Tier 3 - Medium</option>
+                        <option value="4">Tier 4 - Low</option>
+                    </select>
+                </div>
+
+                <!-- Assets Table -->
+                <div class="eca-table border rounded-lg">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 eca-sticky">
+                            <tr>
+                                <th class="px-4 py-3 text-left">
+                                    <input type="checkbox" id="ecaSelectAll" class="rounded">
+                                </th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Asset ID</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Name</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Type</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Location</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Score</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Tier</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ecaAssetsTableBody">
+                            <tr>
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-4 block"></i>
+                                    No assets added yet. Import assets or add manually to get started.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Tab -->
+        <div id="ecaTabAssessment" class="eca-tab-content hidden">
+            <div class="eca-card p-6">
+                <h3 class="text-lg font-semibold mb-4">Batch Assessment</h3>
+                
+                <!-- Assessment Progress -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Assessment Progress</span>
+                        <span id="ecaAssessmentProgress" class="text-sm text-gray-600">0% Complete</span>
+                    </div>
+                    <div class="eca-progress">
+                        <div id="ecaAssessmentProgressBar" class="eca-progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Bulk Assessment Tools -->
+                <div class="eca-grid grid-cols-1 lg:grid-cols-3 mb-6">
+                    <div class="eca-card p-4">
+                        <h4 class="font-semibold mb-3">Quick Assessment</h4>
+                        <p class="text-sm text-gray-600 mb-4">Apply standard scoring templates</p>
+                        <select id="ecaQuickTemplate" class="w-full px-3 py-2 border rounded-lg text-sm mb-3">
+                            <option value="">Select Template</option>
+                            <option value="pump">Centrifugal Pump</option>
+                            <option value="motor">Electric Motor</option>
+                            <option value="compressor">Compressor</option>
+                            <option value="heat_exchanger">Heat Exchanger</option>
+                            <option value="valve">Control Valve</option>
+                        </select>
+                        <button id="ecaApplyTemplate" class="w-full eca-btn-primary text-white py-2 rounded-lg text-sm">
+                            Apply to Selected
+                        </button>
+                    </div>
+
+                    <div class="eca-card p-4">
+                        <h4 class="font-semibold mb-3">Bulk Scoring</h4>
+                        <p class="text-sm text-gray-600 mb-4">Apply same scores to multiple assets</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Safety</span>
+                                <input type="range" id="ecaBulkSafety" min="1" max="10" value="5" class="w-16">
+                                <span id="ecaBulkSafetyValue" class="text-sm w-6">5</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Environmental</span>
+                                <input type="range" id="ecaBulkEnvironmental" min="1" max="10" value="5" class="w-16">
+                                <span id="ecaBulkEnvironmentalValue" class="text-sm w-6">5</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Production</span>
+                                <input type="range" id="ecaBulkProduction" min="1" max="10" value="5" class="w-16">
+                                <span id="ecaBulkProductionValue" class="text-sm w-6">5</span>
+                            </div>
+                        </div>
+                        <button id="ecaApplyBulkScoring" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm mt-3 hover:bg-green-700">
+                            Apply Bulk Scores
+                        </button>
+                    </div>
+
+                    <div class="eca-card p-4">
+                        <h4 class="font-semibold mb-3">Assessment Rules</h4>
+                        <p class="text-sm text-gray-600 mb-4">Automated scoring based on conditions</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" id="ecaRuleAge" class="mr-2">
+                                Age-based scoring
+                            </label>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" id="ecaRuleLocation" class="mr-2">
+                                Location-based scoring
+                            </label>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" id="ecaRuleType" class="mr-2">
+                                Equipment type defaults
+                            </label>
+                        </div>
+                        <button id="ecaApplyRules" class="w-full bg-purple-600 text-white py-2 rounded-lg text-sm mt-3 hover:bg-purple-700">
+                            Apply Rules
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Individual Assessment -->
+                <div id="ecaIndividualAssessment" class="eca-card p-6 hidden">
+                    <h4 class="font-semibold mb-4">Individual Asset Assessment</h4>
+                    <div id="ecaAssessmentForm">
+                        <!-- Assessment form will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="ecaTabSettings" class="eca-tab-content hidden">
+            <div class="eca-grid grid-cols-1 lg:grid-cols-2">
+                <!-- Currency & Regional Settings -->
+                <div class="eca-card p-6">
+                    <h3 class="text-lg font-semibold mb-4">Currency & Regional</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                            <select id="ecaCurrencySelect" class="w-full px-3 py-2 border rounded-lg">
+                                <option value="USD">🇺🇸 USD - US Dollar</option>
+                                <option value="EUR">🇪🇺 EUR - Euro</option>
+                                <option value="GBP">🇬🇧 GBP - British Pound</option>
+                                <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
+                                <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                                <option value="JPY">🇯🇵 JPY - Japanese Yen</option>
+                                <option value="CNY">🇨🇳 CNY - Chinese Yuan</option>
+                                <option value="INR">🇮🇳 INR - Indian Rupee</option>
+                                <option value="BRL">🇧🇷 BRL - Brazilian Real</option>
+                                <option value="MXN">🇲🇽 MXN - Mexican Peso</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Industry Template</label>
+                            <select id="ecaIndustryTemplate" class="w-full px-3 py-2 border rounded-lg">
+                                <option value="general">General Manufacturing</option>
+                                <option value="oil_gas">Oil & Gas</option>
+                                <option value="chemical">Chemical Processing</option>
+                                <option value="pharmaceutical">Pharmaceutical</option>
+                                <option value="food_beverage">Food & Beverage</option>
+                                <option value="power">Power Generation</option>
+                                <option value="water">Water Treatment</option>
+                                <option value="mining">Mining</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Criteria Weighting -->
+                <div class="eca-card p-6">
+                    <h3 class="text-lg font-semibold mb-4">Criteria Weighting</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Safety Impact</label>
+                                <span id="ecaWeightSafetyValue" class="text-sm text-gray-600">25%</span>
+                            </div>
+                            <input type="range" id="ecaWeightSafety" min="0" max="50" value="25" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Environmental Impact</label>
+                                <span id="ecaWeightEnvironmentalValue" class="text-sm text-gray-600">20%</span>
+                            </div>
+                            <input type="range" id="ecaWeightEnvironmental" min="0" max="50" value="20" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Production Impact</label>
+                                <span id="ecaWeightProductionValue" class="text-sm text-gray-600">25%</span>
+                            </div>
+                            <input type="range" id="ecaWeightProduction" min="0" max="50" value="25" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Financial Impact</label>
+                                <span id="ecaWeightFinancialValue" class="text-sm text-gray-600">20%</span>
+                            </div>
+                            <input type="range" id="ecaWeightFinancial" min="0" max="50" value="20" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Quality Impact</label>
+                                <span id="ecaWeightQualityValue" class="text-sm text-gray-600">15%</span>
+                            </div>
+                            <input type="range" id="ecaWeightQuality" min="0" max="50" value="15" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Reputation Impact</label>
+                                <span id="ecaWeightReputationValue" class="text-sm text-gray-600">10%</span>
+                            </div>
+                            <input type="range" id="ecaWeightReputation" min="0" max="50" value="10" class="w-full">
+                        </div>
+                        <div class="text-center pt-4">
+                            <span id="ecaTotalWeight" class="text-sm text-gray-600">Total: 115%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impact Criteria Customization -->
+            <div class="eca-card p-6 mt-6">
+                <h3 class="text-lg font-semibold mb-4">Impact Criteria Customization</h3>
+                <div class="eca-grid grid-cols-1 md:grid-cols-2">
+                    <div>
+                        <h4 class="font-medium mb-3">Financial Impact Levels</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                                <span>Level 1-2:</span>
+                                <input type="text" id="ecaFinancial12" value="< $10,000" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 3-4:</span>
+                                <input type="text" id="ecaFinancial34" value="$10K - $100K" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 5-6:</span>
+                                <input type="text" id="ecaFinancial56" value="$100K - $1M" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 7-8:</span>
+                                <input type="text" id="ecaFinancial78" value="$1M - $10M" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 9-10:</span>
+                                <input type="text" id="ecaFinancial910" value="> $10M" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-3">Production Impact Levels</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                                <span>Level 1-2:</span>
+                                <input type="text" id="ecaProduction12" value="< 1 hour" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 3-4:</span>
+                                <input type="text" id="ecaProduction34" value="1-8 hours" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 5-6:</span>
+                                <input type="text" id="ecaProduction56" value="8-24 hours" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 7-8:</span>
+                                <input type="text" id="ecaProduction78" value="1-7 days" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Level 9-10:</span>
+                                <input type="text" id="ecaProduction910" value="> 7 days" class="px-2 py-1 border rounded text-xs w-24">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button id="ecaSaveCriteria" class="eca-btn-primary text-white px-4 py-2 rounded-lg">
+                        Save Criteria
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="ecaImportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="eca-card p-6 w-full max-w-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Import Assets</h3>
+                    <button id="ecaCloseImportModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                        <p class="mb-4">Drag & drop your file here or click to browse</p>
+                        <input type="file" id="ecaFileInput" accept=".csv,.xlsx,.xls" class="hidden">
+                        <button id="ecaBrowseFile" class="eca-btn-primary text-white px-4 py-2 rounded-lg">
+                            Browse Files
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="font-medium mb-2">Supported Formats:</h4>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li><i class="fas fa-file-csv mr-2"></i>CSV Files (.csv)</li>
+                        <li><i class="fas fa-file-excel mr-2"></i>Excel Files (.xlsx, .xls)</li>
+                    </ul>
+                </div>
+                
+                <div class="flex justify-between">
+                    <button id="ecaDownloadTemplate" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
+                        <i class="fas fa-download mr-2"></i>Download Template
+                    </button>
+                    <div class="space-x-2">
+                        <button id="ecaCancelImport" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button id="ecaConfirmImport" class="eca-btn-primary text-white px-4 py-2 rounded-lg text-sm" disabled>
+                            Import Assets
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Asset Modal -->
+    <div id="ecaAddAssetModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="eca-card p-6 w-full max-w-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Add New Asset</h3>
+                    <button id="ecaCloseAddAssetModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="ecaAddAssetForm" class="space-y-4">
+                    <div class="eca-grid grid-cols-1 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Asset ID</label>
+                            <input type="text" id="ecaAssetId" class="w-full px-3 py-2 border rounded-lg text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Asset Name</label>
+                            <input type="text" id="ecaAssetName" class="w-full px-3 py-2 border rounded-lg text-sm" required>
+                        </div>
+                    </div>
+                    
+                    <div class="eca-grid grid-cols-1 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <select id="ecaAssetType" class="w-full px-3 py-2 border rounded-lg text-sm">
+                                <option value="Rotating">Rotating Equipment</option>
+                                <option value="Fixed">Fixed Equipment</option>
+                                <option value="Mobile">Mobile Equipment</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Instrumentation">Instrumentation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <input type="text" id="ecaAssetLocation" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="eca-grid grid-cols-1 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer</label>
+                            <input type="text" id="ecaAssetManufacturer" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                            <input type="text" id="ecaAssetModel" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="ecaAssetDescription" class="w-full px-3 py-2 border rounded-lg text-sm" rows="3"></textarea>
+                    </div>
+                </form>
+                
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button id="ecaCancelAddAsset" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button id="ecaConfirmAddAsset" class="eca-btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                        Add Asset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let ecaAssets = [];
+        let ecaCriticalityChart = null;
+        let ecaImpactChart = null;
+        let ecaCurrentCurrency = 'USD';
+        let ecaCurrencySymbols = {
+            'USD': '$', 'EUR': '€', 'GBP': '£', 'CAD': 'C$', 'AUD': 'A$',
+            'JPY': '¥', 'CNY': '¥', 'INR': '₹', 'BRL': 'R$', 'MXN': '$'
+        };
+        
+        let ecaWeights = {
+            safety: 25, environmental: 20, production: 25, 
+            financial: 20, quality: 15, reputation: 10
+        };
+        
+        let ecaEquipmentTemplates = {
+            pump: { safety: 6, environmental: 5, production: 8, financial: 7, quality: 6, reputation: 5 },
+            motor: { safety: 5, environmental: 4, production: 7, financial: 6, quality: 5, reputation: 4 },
+            compressor: { safety: 8, environmental: 7, production: 9, financial: 8, quality: 7, reputation: 6 },
+            heat_exchanger: { safety: 6, environmental: 6, production: 7, financial: 7, quality: 6, reputation: 5 },
+            valve: { safety: 7, environmental: 5, production: 8, financial: 6, quality: 7, reputation: 5 }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeECA();
+        });
+
+        function initializeECA() {
+            setupEventListeners();
+            loadSavedData();
+            initializeCharts();
+            updateDashboard();
+        }
+
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.eca-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // Import/Export
+            document.getElementById('ecaImportBtn').addEventListener('click', () => openImportModal());
+            document.getElementById('ecaExportBtn').addEventListener('click', () => exportData());
+            
+            // Modal controls
+            document.getElementById('ecaCloseImportModal').addEventListener('click', () => closeImportModal());
+            document.getElementById('ecaBrowseFile').addEventListener('click', () => document.getElementById('ecaFileInput').click());
+            document.getElementById('ecaFileInput').addEventListener('change', handleFileSelect);
+            document.getElementById('ecaDownloadTemplate').addEventListener('click', downloadTemplate);
+            document.getElementById('ecaConfirmImport').addEventListener('click', processImport);
+            document.getElementById('ecaCancelImport').addEventListener('click', closeImportModal);
+
+            // Add Asset
+            document.getElementById('ecaAddAssetBtn').addEventListener('click', () => openAddAssetModal());
+            document.getElementById('ecaCloseAddAssetModal').addEventListener('click', () => closeAddAssetModal());
+            document.getElementById('ecaConfirmAddAsset').addEventListener('click', addNewAsset);
+            document.getElementById('ecaCancelAddAsset').addEventListener('click', () => closeAddAssetModal());
+
+            // Settings
+            document.getElementById('ecaCurrencySelect').addEventListener('change', function() {
+                ecaCurrentCurrency = this.value;
+                updateCurrencyDisplay();
+                saveSettings();
+            });
+
+            // Weighting sliders
+            ['safety', 'environmental', 'production', 'financial', 'quality', 'reputation'].forEach(criteria => {
+                const slider = document.getElementById(`ecaWeight${criteria.charAt(0).toUpperCase() + criteria.slice(1)}`);
+                if (slider) {
+                    slider.addEventListener('input', function() {
+                        ecaWeights[criteria] = parseInt(this.value);
+                        updateWeightingDisplay();
+                        recalculateAllScores();
+                    });
+                }
+            });
+
+            // Bulk assessment tools
+            document.getElementById('ecaApplyTemplate').addEventListener('click', applyTemplate);
+            document.getElementById('ecaApplyBulkScoring').addEventListener('click', applyBulkScoring);
+            document.getElementById('ecaApplyRules').addEventListener('click', applyRules);
+
+            // Bulk scoring sliders
+            ['safety', 'environmental', 'production'].forEach(criteria => {
+                const slider = document.getElementById(`ecaBulk${criteria.charAt(0).toUpperCase() + criteria.slice(1)}`);
+                if (slider) {
+                    slider.addEventListener('input', function() {
+                        document.getElementById(`ecaBulk${criteria.charAt(0).toUpperCase() + criteria.slice(1)}Value`).textContent = this.value;
+                    });
+                }
+            });
+
+            // Search and filters
+            document.getElementById('ecaSearchAssets').addEventListener('input', filterAssets);
+            document.getElementById('ecaFilterType').addEventListener('change', filterAssets);
+            document.getElementById('ecaFilterLocation').addEventListener('change', filterAssets);
+            document.getElementById('ecaFilterTier').addEventListener('change', filterAssets);
+
+            // Select all checkbox
+            document.getElementById('ecaSelectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#ecaAssetsTableBody input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.eca-tab-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('text-gray-500');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('border-blue-500', 'text-blue-600');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('text-gray-500');
+
+            // Update tab content
+            document.querySelectorAll('.eca-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`ecaTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.remove('hidden');
+
+            // Refresh charts if dashboard is opened
+            if (tabName === 'dashboard') {
+                setTimeout(() => {
+                    if (ecaCriticalityChart) ecaCriticalityChart.resize();
+                    if (ecaImpactChart) ecaImpactChart.resize();
+                }, 100);
+            }
+        }
+
+        function initializeCharts() {
+            // Criticality Distribution Chart
+            const ctxCriticality = document.getElementById('ecaCriticalityChart').getContext('2d');
+            ecaCriticalityChart = new Chart(ctxCriticality, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tier 1 - Critical', 'Tier 2 - High', 'Tier 3 - Medium', 'Tier 4 - Low'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#eab308', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Impact Analysis Chart
+            const ctxImpact = document.getElementById('ecaImpactChart').getContext('2d');
+            ecaImpactChart = new Chart(ctxImpact, {
+                type: 'radar',
+                data: {
+                    labels: ['Safety', 'Environmental', 'Production', 'Financial', 'Quality', 'Reputation'],
+                    datasets: [{
+                        label: 'Average Impact',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgb(102, 126, 234)',
+                        pointBackgroundColor: 'rgb(102, 126, 234)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(102, 126, 234)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function openImportModal() {
+            document.getElementById('ecaImportModal').classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            document.getElementById('ecaImportModal').classList.add('hidden');
+            document.getElementById('ecaFileInput').value = '';
+            document.getElementById('ecaConfirmImport').disabled = true;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('ecaConfirmImport').disabled = false;
+            }
+        }
+
+        function downloadTemplate() {
+            const csvContent = "Asset ID,Asset Name,Type,Location,Department,Manufacturer,Model,Year,Description,Safety Score,Environmental Score,Production Score,Financial Score,Quality Score,Reputation Score\n" +
+                              "PUMP-001,Cooling Water Pump,Rotating,Plant A,Production,Grundfos,CR 32-4,2020,Main cooling system pump,6,5,8,7,6,5\n" +
+                              "MOTOR-001,Drive Motor,Electrical,Plant A,Production,ABB,M3BP 132M,2019,Pump drive motor,5,4,7,6,5,4\n" +
+                              "TANK-001,Storage Tank,Fixed,Plant A,Storage,Custom,ST-1000,2018,Process fluid storage,4,6,6,5,7,5";
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'equipment_criticality_template.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function processImport() {
+            const file = document.getElementById('ecaFileInput').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        if (lines[i].trim() === '') continue;
+                        
+                        const values = lines[i].split(',').map(v => v.trim());
+                        const asset = {
+                            id: values[0] || `AST-${Date.now()}-${i}`,
+                            name: values[1] || 'Unnamed Asset',
+                            type: values[2] || 'General',
+                            location: values[3] || 'Unknown',
+                            department: values[4] || '',
+                            manufacturer: values[5] || '',
+                            model: values[6] || '',
+                            year: values[7] || '',
+                            description: values[8] || '',
+                            scores: {
+                                safety: parseInt(values[9]) || 5,
+                                environmental: parseInt(values[10]) || 5,
+                                production: parseInt(values[11]) || 5,
+                                financial: parseInt(values[12]) || 5,
+                                quality: parseInt(values[13]) || 5,
+                                reputation: parseInt(values[14]) || 5
+                            },
+                            criticality: 0,
+                            tier: 4
+                        };
+                        
+                        asset.criticality = calculateCriticality(asset.scores);
+                        asset.tier = calculateTier(asset.criticality);
+                        ecaAssets.push(asset);
+                    }
+                    
+                    updateAssetsTable();
+                    updateDashboard();
+                    closeImportModal();
+                    
+                    // Show success message
+                    alert(`Successfully imported ${ecaAssets.length} assets!`);
+                    
+                } catch (error) {
+                    alert('Error processing file. Please check the format and try again.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function openAddAssetModal() {
+            document.getElementById('ecaAddAssetModal').classList.remove('hidden');
+        }
+
+        function closeAddAssetModal() {
+            document.getElementById('ecaAddAssetModal').classList.add('hidden');
+            document.getElementById('ecaAddAssetForm').reset();
+        }
+
+        function addNewAsset() {
+            const asset = {
+                id: document.getElementById('ecaAssetId').value,
+                name: document.getElementById('ecaAssetName').value,
+                type: document.getElementById('ecaAssetType').value,
+                location: document.getElementById('ecaAssetLocation').value,
+                manufacturer: document.getElementById('ecaAssetManufacturer').value,
+                model: document.getElementById('ecaAssetModel').value,
+                description: document.getElementById('ecaAssetDescription').value,
+                scores: {
+                    safety: 5, environmental: 5, production: 5,
+                    financial: 5, quality: 5, reputation: 5
+                }
+            };
+            
+            asset.criticality = calculateCriticality(asset.scores);
+            asset.tier = calculateTier(asset.criticality);
+            
+            ecaAssets.push(asset);
+            updateAssetsTable();
+            updateDashboard();
+            closeAddAssetModal();
+        }
+
+        function calculateCriticality(scores) {
+            const weighted = 
+                (scores.safety * ecaWeights.safety) +
+                (scores.environmental * ecaWeights.environmental) +
+                (scores.production * ecaWeights.production) +
+                (scores.financial * ecaWeights.financial) +
+                (scores.quality * ecaWeights.quality) +
+                (scores.reputation * ecaWeights.reputation);
+            
+            const totalWeight = Object.values(ecaWeights).reduce((a, b) => a + b, 0);
+            return Math.round((weighted / totalWeight) * 10) / 10;
+        }
+
+        function calculateTier(criticality) {
+            if (criticality >= 8.5) return 1;
+            if (criticality >= 7.0) return 2;
+            if (criticality >= 5.5) return 3;
+            return 4;
+        }
+
+        function updateAssetsTable() {
+            const tbody = document.getElementById('ecaAssetsTableBody');
+            if (ecaAssets.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-4 block"></i>
+                            No assets added yet. Import assets or add manually to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = ecaAssets.map(asset => {
+                const tierColors = ['bg-red-100 text-red-800', 'bg-orange-100 text-orange-800', 'bg-yellow-100 text-yellow-800', 'bg-green-100 text-green-800'];
+                const tierNames = ['Critical', 'High', 'Medium', 'Low'];
+                
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <input type="checkbox" class="rounded asset-checkbox" data-asset-id="${asset.id}">
+                        </td>
+                        <td class="px-4 py-3 font-mono text-sm">${asset.id}</td>
+                        <td class="px-4 py-3">${asset.name}</td>
+                        <td class="px-4 py-3">${asset.type}</td>
+                        <td class="px-4 py-3">${asset.location}</td>
+                        <td class="px-4 py-3 font-semibold">${asset.criticality}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 text-xs rounded-full ${tierColors[asset.tier - 1]}">
+                                Tier ${asset.tier} - ${tierNames[asset.tier - 1]}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <button onclick="editAsset('${asset.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteAsset('${asset.id}')" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Update location filter options
+            const locations = [...new Set(ecaAssets.map(a => a.location))];
+            const locationFilter = document.getElementById('ecaFilterLocation');
+            locationFilter.innerHTML = '<option value="">All Locations</option>' + 
+                locations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+        }
+
+        function updateDashboard() {
+            // Update stats
+            document.getElementById('ecaTotalAssets').textContent = ecaAssets.length;
+            document.getElementById('ecaCriticalAssets').textContent = ecaAssets.filter(a => a.tier === 1).length;
+            
+            const avgScore = ecaAssets.length > 0 ? 
+                (ecaAssets.reduce((sum, a) => sum + a.criticality, 0) / ecaAssets.length).toFixed(1) : 0;
+            document.getElementById('ecaAvgScore').textContent = avgScore;
+            
+            const totalImpact = ecaAssets.reduce((sum, a) => sum + (a.scores.financial * 10000), 0);
+            document.getElementById('ecaEstImpact').textContent = `${ecaCurrencySymbols[ecaCurrentCurrency]}${totalImpact.toLocaleString()}`;
+
+            // Update tier counts
+            const tierCounts = [0, 0, 0, 0];
+            ecaAssets.forEach(asset => tierCounts[asset.tier - 1]++);
+            
+            document.getElementById('ecaTier1Count').textContent = `${tierCounts[0]} Assets`;
+            document.getElementById('ecaTier2Count').textContent = `${tierCounts[1]} Assets`;
+            document.getElementById('ecaTier3Count').textContent = `${tierCounts[2]} Assets`;
+            document.getElementById('ecaTier4Count').textContent = `${tierCounts[3]} Assets`;
+
+            // Update charts
+            if (ecaCriticalityChart) {
+                ecaCriticalityChart.data.datasets[0].data = tierCounts;
+                ecaCriticalityChart.update();
+            }
+
+            if (ecaImpactChart && ecaAssets.length > 0) {
+                const avgScores = ['safety', 'environmental', 'production', 'financial', 'quality', 'reputation'].map(criteria => {
+                    return ecaAssets.reduce((sum, a) => sum + a.scores[criteria], 0) / ecaAssets.length;
+                });
+                ecaImpactChart.data.datasets[0].data = avgScores;
+                ecaImpactChart.update();
+            }
+        }
+
+        function filterAssets() {
+            const search = document.getElementById('ecaSearchAssets').value.toLowerCase();
+            const typeFilter = document.getElementById('ecaFilterType').value;
+            const locationFilter = document.getElementById('ecaFilterLocation').value;
+            const tierFilter = document.getElementById('ecaFilterTier').value;
+
+            const rows = document.querySelectorAll('#ecaAssetsTableBody tr');
+            rows.forEach(row => {
+                if (row.cells.length <= 1) return; // Skip empty row message
+                
+                const assetId = row.cells[1].textContent.toLowerCase();
+                const assetName = row.cells[2].textContent.toLowerCase();
+                const assetType = row.cells[3].textContent;
+                const assetLocation = row.cells[4].textContent;
+                const assetTier = row.cells[6].textContent.includes('Tier 1') ? '1' : 
+                                 row.cells[6].textContent.includes('Tier 2') ? '2' :
+                                 row.cells[6].textContent.includes('Tier 3') ? '3' : '4';
+
+                const matchesSearch = search === '' || assetId.includes(search) || assetName.includes(search);
+                const matchesType = typeFilter === '' || assetType === typeFilter;
+                const matchesLocation = locationFilter === '' || assetLocation === locationFilter;
+                const matchesTier = tierFilter === '' || assetTier === tierFilter;
+
+                row.style.display = matchesSearch && matchesType && matchesLocation && matchesTier ? '' : 'none';
+            });
+        }
+
+        function applyTemplate() {
+            const template = document.getElementById('ecaQuickTemplate').value;
+            const selectedAssets = getSelectedAssets();
+            
+            if (!template || selectedAssets.length === 0) {
+                alert('Please select a template and assets to apply it to.');
+                return;
+            }
+
+            const templateScores = ecaEquipmentTemplates[template];
+            selectedAssets.forEach(assetId => {
+                const asset = ecaAssets.find(a => a.id === assetId);
+                if (asset) {
+                    asset.scores = { ...templateScores };
+                    asset.criticality = calculateCriticality(asset.scores);
+                    asset.tier = calculateTier(asset.criticality);
+                }
+            });
+
+            updateAssetsTable();
+            updateDashboard();
+            alert(`Applied ${template} template to ${selectedAssets.length} assets.`);
+        }
+
+        function applyBulkScoring() {
+            const selectedAssets = getSelectedAssets();
+            if (selectedAssets.length === 0) {
+                alert('Please select assets to apply bulk scoring to.');
+                return;
+            }
+
+            const bulkScores = {
+                safety: parseInt(document.getElementById('ecaBulkSafety').value),
+                environmental: parseInt(document.getElementById('ecaBulkEnvironmental').value),
+                production: parseInt(document.getElementById('ecaBulkProduction').value)
+            };
+
+            selectedAssets.forEach(assetId => {
+                const asset = ecaAssets.find(a => a.id === assetId);
+                if (asset) {
+                    Object.assign(asset.scores, bulkScores);
+                    asset.criticality = calculateCriticality(asset.scores);
+                    asset.tier = calculateTier(asset.criticality);
+                }
+            });
+
+            updateAssetsTable();
+            updateDashboard();
+            alert(`Applied bulk scoring to ${selectedAssets.length} assets.`);
+        }
+
+        function applyRules() {
+            const ageRule = document.getElementById('ecaRuleAge').checked;
+            const locationRule = document.getElementById('ecaRuleLocation').checked;
+            const typeRule = document.getElementById('ecaRuleType').checked;
+
+            let appliedCount = 0;
+
+            ecaAssets.forEach(asset => {
+                let modified = false;
+
+                if (typeRule && ecaEquipmentTemplates[asset.type.toLowerCase()]) {
+                    Object.assign(asset.scores, ecaEquipmentTemplates[asset.type.toLowerCase()]);
+                    modified = true;
+                }
+
+                if (locationRule) {
+                    // Example rule: assets in critical locations get higher safety scores
+                    if (asset.location.toLowerCase().includes('critical') || asset.location.toLowerCase().includes('main')) {
+                        asset.scores.safety = Math.min(10, asset.scores.safety + 2);
+                        modified = true;
+                    }
+                }
+
+                if (ageRule && asset.year) {
+                    const age = new Date().getFullYear() - parseInt(asset.year);
+                    if (age > 15) {
+                        asset.scores.safety = Math.max(1, asset.scores.safety - 1);
+                        asset.scores.environmental = Math.max(1, asset.scores.environmental - 1);
+                        modified = true;
+                    }
+                }
+
+                if (modified) {
+                    asset.criticality = calculateCriticality(asset.scores);
+                    asset.tier = calculateTier(asset.criticality);
+                    appliedCount++;
+                }
+            });
+
+            updateAssetsTable();
+            updateDashboard();
+            alert(`Applied rules to ${appliedCount} assets.`);
+        }
+
+        function getSelectedAssets() {
+            const checkboxes = document.querySelectorAll('#ecaAssetsTableBody .asset-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.dataset.assetId);
+        }
+
+        function updateWeightingDisplay() {
+            Object.keys(ecaWeights).forEach(criteria => {
+                const valueElement = document.getElementById(`ecaWeight${criteria.charAt(0).toUpperCase() + criteria.slice(1)}Value`);
+                if (valueElement) {
+                    valueElement.textContent = `${ecaWeights[criteria]}%`;
+                }
+            });
+
+            const total = Object.values(ecaWeights).reduce((a, b) => a + b, 0);
+            document.getElementById('ecaTotalWeight').textContent = `Total: ${total}%`;
+        }
+
+        function updateCurrencyDisplay() {
+            // Update all currency-related displays
+            updateDashboard();
+        }
+
+        function recalculateAllScores() {
+            ecaAssets.forEach(asset => {
+                asset.criticality = calculateCriticality(asset.scores);
+                asset.tier = calculateTier(asset.criticality);
+            });
+            updateAssetsTable();
+            updateDashboard();
+        }
+
+        function exportData() {
+            const csvContent = "Asset ID,Asset Name,Type,Location,Manufacturer,Model,Safety Score,Environmental Score,Production Score,Financial Score,Quality Score,Reputation Score,Criticality Score,Tier\n" +
+                ecaAssets.map(asset => 
+                    `"${asset.id}","${asset.name}","${asset.type}","${asset.location}","${asset.manufacturer || ''}","${asset.model || ''}",${asset.scores.safety},${asset.scores.environmental},${asset.scores.production},${asset.scores.financial},${asset.scores.quality},${asset.scores.reputation},${asset.criticality},${asset.tier}`
+                ).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'equipment_criticality_assessment.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function editAsset(assetId) {
+            const asset = ecaAssets.find(a => a.id === assetId);
+            if (!asset) return;
+            
+            // This would open an edit modal - simplified for now
+            alert(`Edit functionality for ${asset.name} would be implemented here.`);
+        }
+
+        function deleteAsset(assetId) {
+            if (confirm('Are you sure you want to delete this asset?')) {
+                ecaAssets = ecaAssets.filter(a => a.id !== assetId);
+                updateAssetsTable();
+                updateDashboard();
+            }
+        }
+
+        function loadSavedData() {
+            const saved = localStorage.getItem('ecaData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    ecaAssets = data.assets || [];
+                    ecaCurrentCurrency = data.currency || 'USD';
+                    ecaWeights = data.weights || ecaWeights;
+                    
+                    document.getElementById('ecaCurrencySelect').value = ecaCurrentCurrency;
+                    updateWeightingDisplay();
+                    updateAssetsTable();
+                    updateDashboard();
+                } catch (e) {
+                    console.log('Error loading saved data');
+                }
+            }
+        }
+
+        function saveSettings() {
+            const data = {
+                assets: ecaAssets,
+                currency: ecaCurrentCurrency,
+                weights: ecaWeights
+            };
+            localStorage.setItem('ecaData', JSON.stringify(data));
+        }
+
+        // Auto-save data periodically
+        setInterval(saveSettings, 30000); // Save every 30 seconds
+
+        // Initialize weighting display
+        updateWeightingDisplay();
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"953e52064ea9f796","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.6.2","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDjBHYXYfr1NgqCmrIZvz2nxrtuoPBA%2FZ%2FQ5wT5ARvvM9ys%2Fbv87LYKg4tYYldv89nvEvLLqU%2B9AQOTcQYGq6vGLse1oXx6IQ4WR7UyMusiM81CFCcMf3LIlPB0fO4RfXwXL0Hi8nrdjPZ6KOqP5cMpvSbjpf0pBjCNOWfi8dmO2Sl%2BrSkV5Dm2sHsK%2FmGSb%2F8jLJHFjMcBt1FepBu6u%2BGlOPiHul2WTk8HeYDar09XGLkR30mcyahLjCuSMjQtNHLg866wmzAQz99iLAitRjgN4H5t01%2Fd4bPdA6Ez5fgVP373nPSVG3W2hEjOsBdmzjnbBBaATMOZI1GIktuh9T3qUwNOXoo7Tt8Vq4278EtesdIPZnNKomw1ln5it9UTAOjTXeExWIzcpdeXuLCUd2yLaumRovPRM%2FZtLNRZGMQw2yZatlHK8tx5tIaBkzYUhzw9sH0jij6unRbSmaNOaWTOJBTv4YqRwWBblx6l%2FpKB4VH64bzZa6bL6Jq8HX3Q6k6LZA2QXXQwPcVRIzvRCuIOw%3D";
+        window.__genspark_locale = "en-US";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDjBHYXYfr1NgqCmrIZvz2nxrtuoPBA/Z/Q5wT5ARvvM9ys/bv87LYKg4tYYldv89nvEvLLqU+9AQOTcQYGq6vGLse1oXx6IQ4WR7UyMusiM81CFCcMf3LIlPB0fO4RfXwXL0Hi8nrdjPZ6KOqP5cMpvSbjpf0pBjCNOWfi8dmO2Sl+rSkV5Dm2sHsK/mGSb/8jLJHFjMcBt1FepBu6u+GlOPiHul2WTk8HeYDar09XGLkR30mcyahLjCuSMjQtNHLg866wmzAQz99iLAitRjgN4H5t01/d4bPdA6Ez5fgVP373nPSVG3W2hEjOsBdmzjnbBBaATMOZI1GIktuh9T3qUwNOXoo7Tt8Vq4278EtesdIPZnNKomw1ln5it9UTAOjTXeExWIzcpdeXuLCUd2yLaumRovPRM/ZtLNRZGMQw2yZatlHK8tx5tIaBkzYUhzw9sH0jij6unRbSmaNOaWTOJBTv4YqRwWBblx6l/pKB4VH64bzZa6bL6Jq8HX3Q6k6LZA2QXXQwPcVRIzvRCuIOw=";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    
