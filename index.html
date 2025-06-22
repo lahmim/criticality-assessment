@@ -3,750 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipment Criticality Assessment System - Complete</title>
+    <title>Equipment Criticality Assessment System</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        .flag-icon {
+            width: 20px;
+            height: 15px;
+            background-size: cover;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .flag-en { background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDEyMTY5Ii8+CjxwYXRoIGQ9Ik0wIDBoMjB2MTRINS41em0wIDBoMjB2MTRINS41eiIgZmlsbD0iI0ZGRiIvPgo8L3N2Zz4K'); }
+        .flag-fr { background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYuNjciIGhlaWdodD0iMTUiIGZpbGw9IiMwMDJhOTUiLz4KPHJlY3QgeD0iNi42NyIgd2lkdGg9IjYuNjciIGhlaWdodD0iMTUiIGZpbGw9IiNGRkYiLz4KPHJlY3QgeD0iMTMuMzQiIHdpZHRoPSI2LjY2IiBoZWlnaHQ9IjE1IiBmaWxsPSIjZWYxOTIwIi8+Cjwvc3ZnPgo='); }
+        .flag-de { background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjUiIGZpbGw9IiMwMDAiLz4KPHJlY3QgeT0iNSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjUiIGZpbGw9IiNkZDBhMzciLz4KPHJlY3QgeT0iMTAiIHdpZHRoPSIyMCIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZjZTAwIi8+Cjwvc3ZnPgo='); }
+        .flag-es { background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjZmZjNDAwIi8+CjxyZWN0IHk9IjMiIHdpZHRoPSIyMCIgaGVpZ2h0PSI5IiBmaWxsPSIjZWEwMDEyIi8+Cjwvc3ZnPgo='); }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .critcality-tier-1 { background: linear-gradient(135deg, #fee2e2, #fecaca); border-left: 4px solid #dc2626; }
-        .critcality-tier-2 { background: linear-gradient(135deg, #fed7aa, #fdba74); border-left: 4px solid #ea580c; }
-        .critcality-tier-3 { background: linear-gradient(135deg, #fef3c7, #fde68a); border-left: 4px solid #d97706; }
-        .critcality-tier-4 { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-left: 4px solid #16a34a; }
-        .print-break { page-break-inside: avoid; }
+        
+        .criticality-tier-1 { background-color: #fee2e2; border-left: 4px solid #dc2626; }
+        .criticality-tier-2 { background-color: #fef3c7; border-left: 4px solid #f59e0b; }
+        .criticality-tier-3 { background-color: #fef9c3; border-left: 4px solid #eab308; }
+        .criticality-tier-4 { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+        
          {
+            .no-print { display: none !important; }
             body { font-size: 12px; }
-            .no-print { display: none; }
+            .container { max-width: none !important; }
         }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <div class="bg-white shadow-sm border-b">
-            <div class="max-w-full mx-auto px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-blue-600 text-white p-2 rounded-lg">
-                            <i class="fas fa-tools text-xl"></i>
+    <!-- Header with Language Selector -->
+    <header class="bg-white shadow-sm border-b no-print">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-cogs text-2xl text-blue-600"></i>
+                    <h1 class="text-xl font-bold text-gray-900" id="main-title">Equipment Criticality Assessment System</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="languageSelector" class="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="en"><span class="flag-icon flag-en"></span>English</option>
+                        <option value="fr"><span class="flag-icon flag-fr"></span>Français</option>
+                        <option value="de"><span class="flag-icon flag-de"></span>Deutsch</option>
+                        <option value="es"><span class="flag-icon flag-es"></span>Español</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- Navigation Tabs -->
+        <nav class="flex space-x-4 mb-6 no-print">
+            <button class="tab-btn px-4 py-2 bg-blue-600 text-white rounded-md" data-tab="dashboard">
+                <i class="fas fa-tachometer-alt mr-2"></i><span data-translate="nav.dashboard">Dashboard</span>
+            </button>
+            <button class="tab-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" data-tab="import">
+                <i class="fas fa-upload mr-2"></i><span data-translate="nav.import">Import Assets</span>
+            </button>
+            <button class="tab-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" data-tab="assessment">
+                <i class="fas fa-clipboard-check mr-2"></i><span data-translate="nav.assessment">Batch Assessment</span>
+            </button>
+            <button class="tab-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" data-tab="reports">
+                <i class="fas fa-chart-bar mr-2"></i><span data-translate="nav.reports">Reports</span>
+            </button>
+            <button class="tab-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" data-tab="settings">
+                <i class="fas fa-cog mr-2"></i><span data-translate="nav.settings">Settings</span>
+            </button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Statistics Cards -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-100 rounded-full">
+                            <i class="fas fa-server text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600" data-translate="dashboard.total_assets">Total Assets</p>
+                            <p class="text-2xl font-bold text-gray-900" id="totalAssets">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-red-100 rounded-full">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600" data-translate="dashboard.critical_assets">Critical Assets</p>
+                            <p class="text-2xl font-bold text-gray-900" id="criticalAssets">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-100 rounded-full">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600" data-translate="dashboard.assessed_assets">Assessed Assets</p>
+                            <p class="text-2xl font-bold text-gray-900" id="assessedAssets">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Criticality Distribution Chart -->
+            <div class="bg-white p-6 rounded-lg shadow mb-8">
+                <h3 class="text-lg font-semibold mb-4" data-translate="dashboard.criticality_distribution">Criticality Distribution</h3>
+                <div style="height: 400px;">
+                    <canvas id="criticalityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Asset List -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold" data-translate="dashboard.recent_assets">Recent Assets</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.asset_id">Asset ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.name">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.type">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.location">Location</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.criticality">Criticality</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assetTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Tab -->
+        <div id="import" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Import Form -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-4" data-translate="import.title">Import Assets</h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="import.select_file">Select File</label>
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="w-full p-3 border border-gray-300 rounded-md">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <button id="downloadTemplate" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                            <i class="fas fa-download mr-2"></i><span data-translate="import.download_template">Download Template</span>
+                        </button>
+                    </div>
+                    
+                    <button id="importButton" class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-upload mr-2"></i><span data-translate="import.import_data">Import Data</span>
+                    </button>
+                </div>
+                
+                <!-- Import Instructions -->
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-info-circle text-blue-600 text-xl mr-3"></i>
+                        <h4 class="text-lg font-semibold text-blue-900" data-translate="import.validation_title">Import Validation</h4>
+                    </div>
+                    
+                    <div class="space-y-3 text-sm text-blue-800">
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span data-translate="import.validation.asset_id">Asset ID must be unique</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span data-translate="import.validation.asset_name">Asset Name is required</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span data-translate="import.validation.type">Type must be one of: Rotating, Fixed, Mobile, Electrical, Instrumentation</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span data-translate="import.validation.location">Location should specify facility/area</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-info text-blue-600 mr-2 mt-1"></i>
+                            <span data-translate="import.validation.optional">Optional fields: Description, Manufacturer, Model, Install Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Import Progress -->
+            <div id="importProgress" class="mt-6 bg-white p-6 rounded-lg shadow hidden">
+                <h4 class="text-lg font-semibold mb-4" data-translate="import.progress">Import Progress</h4>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-sm text-gray-600 mt-2">0% Complete</p>
+            </div>
+        </div>
+
+        <!-- Assessment Tab -->
+        <div id="assessment" class="tab-content">
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold" data-translate="assessment.title">Batch Asset Assessment</h3>
+                </div>
+                
+                <!-- Assessment Controls -->
+                <div class="p-6 border-b border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="assessment.currency">Currency</label>
+                            <select id="currencySelect" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="CAD">CAD ($)</option>
+                            </select>
                         </div>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900">Equipment Criticality Assessment System</h1>
-                            <p class="text-sm text-gray-600">Professional Asset Management & Maintenance Planning Tool</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <select id="currencySelect" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
-                            <option value="USD">USD ($)</option>
-                            <option value="EUR">EUR (€)</option>
-                            <option value="GBP">GBP (£)</option>
-                            <option value="CAD">CAD ($)</option>
-                            <option value="AUD">AUD ($)</option>
-                            <option value="JPY">JPY (¥)</option>
-                            <option value="CNY">CNY (¥)</option>
-                            <option value="INR">INR (₹)</option>
-                        </select>
-                        <div class="text-sm text-gray-600">
-                            <span id="assetCount">0</span> Assets
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation Tabs -->
-        <div class="bg-white border-b">
-            <div class="max-w-full mx-auto px-6">
-                <nav class="flex space-x-8">
-                    <button class="tab-btn active py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-sm" data-tab="dashboard">
-                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                    </button>
-                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="import">
-                        <i class="fas fa-upload mr-2"></i>Import Assets
-                    </button>
-                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="assessment">
-                        <i class="fas fa-clipboard-check mr-2"></i>Batch Assessment
-                    </button>
-                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="management">
-                        <i class="fas fa-cogs mr-2"></i>Asset Management
-                    </button>
-                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="reports">
-                        <i class="fas fa-file-alt mr-2"></i>Reports
-                    </button>
-                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="settings">
-                        <i class="fas fa-cog mr-2"></i>Settings
-                    </button>
-                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm" data-tab="help">
-                        <i class="fas fa-question-circle mr-2"></i>Help
-                    </button>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Content Area -->
-        <div class="max-w-full mx-auto px-6 py-6">
-            
-            <!-- Dashboard Tab -->
-            <div id="dashboard" class="tab-content active">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <div class="flex items-center">
-                            <div class="bg-red-100 p-3 rounded-lg">
-                                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-600">Critical Assets</p>
-                                <p class="text-2xl font-bold text-gray-900" id="criticalCount">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <div class="flex items-center">
-                            <div class="bg-orange-100 p-3 rounded-lg">
-                                <i class="fas fa-exclamation text-orange-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-600">High Priority</p>
-                                <p class="text-2xl font-bold text-gray-900" id="highCount">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <div class="flex items-center">
-                            <div class="bg-yellow-100 p-3 rounded-lg">
-                                <i class="fas fa-minus text-yellow-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-600">Medium Priority</p>
-                                <p class="text-2xl font-bold text-gray-900" id="mediumCount">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <div class="flex items-center">
-                            <div class="bg-green-100 p-3 rounded-lg">
-                                <i class="fas fa-check text-green-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-600">Low Priority</p>
-                                <p class="text-2xl font-bold text-gray-900" id="lowCount">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Criticality Distribution</h3>
-                        <div style="height: 300px;">
-                            <canvas id="criticalityChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Maintenance Priority Matrix</h3>
-                        <div class="grid grid-cols-3 gap-2 h-64">
-                            <div class="bg-yellow-200 p-2 rounded text-center text-xs font-medium">Medium<br>Low Impact<br>High Probability</div>
-                            <div class="bg-orange-300 p-2 rounded text-center text-xs font-medium">High<br>Medium Impact<br>High Probability</div>
-                            <div class="bg-red-400 p-2 rounded text-center text-xs font-medium">Critical<br>High Impact<br>High Probability</div>
-                            <div class="bg-green-200 p-2 rounded text-center text-xs font-medium">Low<br>Low Impact<br>Medium Probability</div>
-                            <div class="bg-yellow-300 p-2 rounded text-center text-xs font-medium">Medium<br>Medium Impact<br>Medium Probability</div>
-                            <div class="bg-orange-400 p-2 rounded text-center text-xs font-medium">High<br>High Impact<br>Medium Probability</div>
-                            <div class="bg-green-300 p-2 rounded text-center text-xs font-medium">Low<br>Low Impact<br>Low Probability</div>
-                            <div class="bg-green-400 p-2 rounded text-center text-xs font-medium">Low<br>Medium Impact<br>Low Probability</div>
-                            <div class="bg-yellow-400 p-2 rounded text-center text-xs font-medium">Medium<br>High Impact<br>Low Probability</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Action Plan Summary</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="critcality-tier-1 p-4 rounded-lg print-break">
-                            <h4 class="font-semibold text-red-800 mb-2">Tier 1 - Critical Assets</h4>
-                            <ul class="text-sm text-red-700 space-y-1">
-                                <li>• Real-time monitoring required</li>
-                                <li>• Predictive maintenance programs</li>
-                                <li>• 24/7 response protocols</li>
-                                <li>• Redundancy assessment</li>
-                            </ul>
-                        </div>
-                        <div class="critcality-tier-2 p-4 rounded-lg print-break">
-                            <h4 class="font-semibold text-orange-800 mb-2">Tier 2 - High Priority</h4>
-                            <ul class="text-sm text-orange-700 space-y-1">
-                                <li>• Condition-based monitoring</li>
-                                <li>• Enhanced PM programs</li>
-                                <li>• Priority spare parts</li>
-                                <li>• Quarterly reviews</li>
-                            </ul>
-                        </div>
-                        <div class="critcality-tier-3 p-4 rounded-lg print-break">
-                            <h4 class="font-semibold text-yellow-800 mb-2">Tier 3 - Medium Priority</h4>
-                            <ul class="text-sm text-yellow-700 space-y-1">
-                                <li>• Standard PM schedules</li>
-                                <li>• Routine inspections</li>
-                                <li>• Standard spare parts</li>
-                                <li>• Semi-annual reviews</li>
-                            </ul>
-                        </div>
-                        <div class="critcality-tier-4 p-4 rounded-lg print-break">
-                            <h4 class="font-semibold text-green-800 mb-2">Tier 4 - Low Priority</h4>
-                            <ul class="text-sm text-green-700 space-y-1">
-                                <li>• Run-to-failure acceptable</li>
-                                <li>• Basic safety checks</li>
-                                <li>• Emergency parts only</li>
-                                <li>• Annual reviews</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Import Assets Tab -->
-            <div id="import" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2">
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Bulk Asset Import</h3>
-                            
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-6">
-                                <i class="fas fa-upload text-4xl text-gray-400 mb-4"></i>
-                                <p class="text-lg font-medium text-gray-700 mb-2">Drag & Drop Files or Click to Browse</p>
-                                <p class="text-sm text-gray-500 mb-4">Supported formats: CSV, Excel (.xlsx, .xls)</p>
-                                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden">
-                                <button onclick="document.getElementById('fileInput').click()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                    Select File
-                                </button>
-                            </div>
-
-                            <div class="flex space-x-4 mb-6">
-                                <button id="downloadTemplate" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-                                    <i class="fas fa-download mr-2"></i>Download CSV Template
-                                </button>
-                                <button id="downloadExcelTemplate" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                    <i class="fas fa-file-excel mr-2"></i>Download Excel Template
-                                </button>
-                            </div>
-
-                            <div id="importPreview" class="hidden">
-                                <h4 class="font-semibold text-gray-900 mb-4">Import Preview</h4>
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-200">
-                                        <thead class="bg-gray-50">
-                                            <tr id="previewHeaders"></tr>
-                                        </thead>
-                                        <tbody id="previewData" class="bg-white divide-y divide-gray-200"></tbody>
-                                    </table>
-                                </div>
-                                <div class="mt-4 flex space-x-4">
-                                    <button id="confirmImport" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-                                        Confirm Import
-                                    </button>
-                                    <button id="cancelImport" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div id="importResults" class="hidden mt-6">
-                                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                                    <strong>Import Complete!</strong>
-                                    <div id="importSummary"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-1">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                            <div class="flex items-center mb-4">
-                                <i class="fas fa-check-circle text-blue-600 text-xl mr-3"></i>
-                                <h3 class="text-lg font-semibold text-blue-900">Import Validation</h3>
-                            </div>
-                            
-                            <div class="space-y-4 text-sm">
-                                <div>
-                                    <h4 class="font-semibold text-blue-800 mb-2">Import Instructions</h4>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li>• Asset ID must be unique</li>
-                                        <li>• Asset Name is required</li>
-                                        <li>• Type must be one of: Rotating, Fixed, Mobile, Electrical, Instrumentation</li>
-                                        <li>• Location should specify facility/area</li>
-                                        <li>• Optional fields: Description, Manufacturer, Model, Install Date</li>
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 class="font-semibold text-blue-800 mb-2">Required Columns</h4>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li><strong>Asset_ID:</strong> Unique identifier</li>
-                                        <li><strong>Asset_Name:</strong> Equipment name</li>
-                                        <li><strong>Type:</strong> Equipment category</li>
-                                        <li><strong>Location:</strong> Physical location</li>
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 class="font-semibold text-blue-800 mb-2">Optional Columns</h4>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li><strong>Description:</strong> Equipment details</li>
-                                        <li><strong>Manufacturer:</strong> Equipment maker</li>
-                                        <li><strong>Model:</strong> Model number</li>
-                                        <li><strong>Install_Date:</strong> YYYY-MM-DD format</li>
-                                        <li><strong>Department:</strong> Responsible department</li>
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 class="font-semibold text-blue-800 mb-2">Scoring Columns (Optional)</h4>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li><strong>Safety_Score:</strong> 1-10 scale</li>
-                                        <li><strong>Environmental_Score:</strong> 1-10 scale</li>
-                                        <li><strong>Production_Score:</strong> 1-10 scale</li>
-                                        <li><strong>Financial_Score:</strong> 1-10 scale</li>
-                                        <li><strong>Quality_Score:</strong> 1-10 scale</li>
-                                        <li><strong>Reputation_Score:</strong> 1-10 scale</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Batch Assessment Tab -->
-            <div id="assessment" class="tab-content">
-                <div class="bg-white p-6 rounded-lg shadow mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Batch Assessment Tools</h3>
-                        <div class="flex space-x-4">
-                            <select id="batchOperation" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                <option value="">Select Operation</option>
-                                <option value="score">Bulk Scoring</option>
-                                <option value="template">Apply Template</option>
-                                <option value="edit">Bulk Edit</option>
-                                <option value="delete">Delete Selected</option>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="assessment.filter_type">Filter by Type</label>
+                            <select id="typeFilter" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="" data-translate="assessment.all_types">All Types</option>
+                                <option value="Rotating" data-translate="assessment.rotating">Rotating</option>
+                                <option value="Fixed" data-translate="assessment.fixed">Fixed</option>
+                                <option value="Mobile" data-translate="assessment.mobile">Mobile</option>
+                                <option value="Electrical" data-translate="assessment.electrical">Electrical</option>
+                                <option value="Instrumentation" data-translate="assessment.instrumentation">Instrumentation</option>
                             </select>
-                            <button id="executeBatch" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                Execute
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="assessment.filter_location">Filter by Location</label>
+                            <input type="text" id="locationFilter" placeholder="Enter location..." class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="bulkAssessBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                <i class="fas fa-magic mr-2"></i><span data-translate="assessment.bulk_assess">Bulk Assess</span>
                             </button>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Assessment Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left">
+                                    <input type="checkbox" id="selectAll" class="rounded">
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.asset_id">Asset ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.name">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="criteria.safety">Safety</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="criteria.environmental">Environmental</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="criteria.production">Production</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="criteria.financial">Financial</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="criteria.quality">Quality</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="criteria.reputation">Reputation</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="table.criticality">Criticality</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-                    <div class="mb-4">
-                        <div class="flex space-x-4">
-                            <input type="text" id="searchAssets" placeholder="Search assets..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2">
-                            <select id="filterType" class="border border-gray-300 rounded-lg px-3 py-2">
-                                <option value="">All Types</option>
-                                <option value="Rotating">Rotating</option>
-                                <option value="Fixed">Fixed</option>
-                                <option value="Mobile">Mobile</option>
-                                <option value="Electrical">Electrical</option>
-                                <option value="Instrumentation">Instrumentation</option>
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Report Generation -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-4" data-translate="reports.generation">Report Generation</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="reports.type">Report Type</label>
+                            <select id="reportType" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="comprehensive" data-translate="reports.comprehensive">Comprehensive Assessment Report</option>
+                                <option value="executive" data-translate="reports.executive">Executive Summary</option>
+                                <option value="maintenance" data-translate="reports.maintenance">Maintenance Priority List</option>
+                                <option value="department" data-translate="reports.department">Department-Specific Report</option>
+                                <option value="compliance" data-translate="reports.compliance">Compliance Audit Report</option>
                             </select>
-                            <select id="filterCriticality" class="border border-gray-300 rounded-lg px-3 py-2">
-                                <option value="">All Criticality</option>
-                                <option value="1">Tier 1 - Critical</option>
-                                <option value="2">Tier 2 - High</option>
-                                <option value="3">Tier 3 - Medium</option>
-                                <option value="4">Tier 4 - Low</option>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="reports.include_assets">Include Assets</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="includeAssets" value="all" checked class="mr-2">
+                                    <span data-translate="reports.all_assets">All Assets</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="includeAssets" value="critical" class="mr-2">
+                                    <span data-translate="reports.critical_only">Critical Assets Only</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="includeAssets" value="selected" class="mr-2">
+                                    <span data-translate="reports.selected_only">Selected Assets Only</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="reports.company_name">Company Name</label>
+                            <input type="text" id="companyName" placeholder="Enter company name..." class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        
+                        <button id="generateReport" class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700">
+                            <i class="fas fa-file-pdf mr-2"></i><span data-translate="reports.generate_pdf">Generate PDF Report</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Maintenance Priority Matrix -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-4" data-translate="reports.priority_matrix">Maintenance Priority Matrix</h3>
+                    <div style="height: 400px;">
+                        <canvas id="priorityMatrix"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Plan Summary -->
+            <div class="mt-8 bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4" data-translate="reports.action_plan">Action Plan Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="criticality-tier-1 p-4 rounded-lg">
+                        <h4 class="font-semibold text-red-800 mb-2" data-translate="tiers.tier1">Tier 1 - Critical</h4>
+                        <ul class="text-sm text-red-700 space-y-1">
+                            <li data-translate="actions.tier1.predictive">• Predictive maintenance programs</li>
+                            <li data-translate="actions.tier1.realtime">• Real-time monitoring systems</li>
+                            <li data-translate="actions.tier1.redundancy">• Redundancy assessment</li>
+                            <li data-translate="actions.tier1.emergency">• Emergency response procedures</li>
+                        </ul>
+                    </div>
+                    <div class="criticality-tier-2 p-4 rounded-lg">
+                        <h4 class="font-semibold text-orange-800 mb-2" data-translate="tiers.tier2">Tier 2 - High</h4>
+                        <ul class="text-sm text-orange-700 space-y-1">
+                            <li data-translate="actions.tier2.risk_based">• Risk-based inspections</li>
+                            <li data-translate="actions.tier2.scheduled">• Scheduled PdM activities</li>
+                            <li data-translate="actions.tier2.enhanced">• Enhanced PM programs</li>
+                            <li data-translate="actions.tier2.failure_analysis">• Failure mode analysis</li>
+                        </ul>
+                    </div>
+                    <div class="criticality-tier-3 p-4 rounded-lg">
+                        <h4 class="font-semibold text-yellow-800 mb-2" data-translate="tiers.tier3">Tier 3 - Medium</h4>
+                        <ul class="text-sm text-yellow-700 space-y-1">
+                            <li data-translate="actions.tier3.preventive">• Standard preventive maintenance</li>
+                            <li data-translate="actions.tier3.basic_monitoring">• Basic condition monitoring</li>
+                            <li data-translate="actions.tier3.oem">• OEM recommended maintenance</li>
+                            <li data-translate="actions.tier3.spare_parts">• Standard spare parts inventory</li>
+                        </ul>
+                    </div>
+                    <div class="criticality-tier-4 p-4 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2" data-translate="tiers.tier4">Tier 4 - Low</h4>
+                        <ul class="text-sm text-green-700 space-y-1">
+                            <li data-translate="actions.tier4.run_to_failure">• Run-to-failure strategy</li>
+                            <li data-translate="actions.tier4.minimal">• Minimal intervention</li>
+                            <li data-translate="actions.tier4.safety_checks">• Safety checks only</li>
+                            <li data-translate="actions.tier4.cost_optimization">• Cost optimization focus</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Criteria Customization -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-4" data-translate="settings.criteria_customization">Impact Criteria Customization</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="settings.industry_template">Industry Template</label>
+                            <select id="industryTemplate" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="manufacturing" data-translate="industries.manufacturing">Manufacturing</option>
+                                <option value="oil_gas" data-translate="industries.oil_gas">Oil & Gas</option>
+                                <option value="chemical" data-translate="industries.chemical">Chemical Processing</option>
+                                <option value="pharmaceutical" data-translate="industries.pharmaceutical">Pharmaceutical</option>
+                                <option value="power" data-translate="industries.power">Power Generation</option>
+                                <option value="water" data-translate="industries.water">Water Treatment</option>
+                                <option value="food" data-translate="industries.food">Food & Beverage</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <input type="checkbox" id="selectAll" class="rounded">
-                                    </th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset ID</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Safety</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Environmental</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Production</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Financial</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reputation</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criticality</th>
-                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="assetTable" class="bg-white divide-y divide-gray-200">
-                                <!-- Assets will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Asset Management Tab -->
-            <div id="management" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2">
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Asset Hierarchy</h3>
-                                <button id="addAsset" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                    <i class="fas fa-plus mr-2"></i>Add Asset
-                                </button>
-                            </div>
-                            
-                            <div id="assetHierarchy" class="space-y-4">
-                                <!-- Asset hierarchy will be built here -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-1">
-                        <div class="bg-white p-6 rounded-lg shadow mb-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Statistics</h3>
-                            <div class="space-y-4">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Total Assets:</span>
-                                    <span class="font-semibold" id="totalAssets">0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Assessed:</span>
-                                    <span class="font-semibold" id="assessedAssets">0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Pending:</span>
-                                    <span class="font-semibold" id="pendingAssets">0</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Equipment Type Distribution</h3>
-                            <div style="height: 250px;">
-                                <canvas id="typeChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reports Tab -->
-            <div id="reports" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Report Generation</h3>
                         
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-                                <select id="reportType" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                                    <option value="comprehensive">Comprehensive Assessment Report</option>
-                                    <option value="executive">Executive Summary</option>
-                                    <option value="maintenance">Maintenance Priority List</option>
-                                    <option value="action">Action Plan Summary</option>
-                                    <option value="cost">Cost-Benefit Analysis</option>
-                                    <option value="compliance">Compliance Report</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Include Assets</label>
-                                <select id="includeAssets" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                                    <option value="all">All Assets</option>
-                                    <option value="critical">Critical Assets Only</option>
-                                    <option value="selected">Selected Assets Only</option>
-                                    <option value="tier1">Tier 1 Assets</option>
-                                    <option value="tier2">Tier 2 Assets</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
-                                <input type="text" id="companyName" placeholder="Enter company name for report header" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Title</label>
-                                <input type="text" id="reportTitle" placeholder="Custom report title (optional)" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Industry Template</label>
-                                <select id="industryTemplate" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                                    <option value="general">General Manufacturing</option>
-                                    <option value="oil-gas">Oil & Gas</option>
-                                    <option value="pharmaceutical">Pharmaceutical</option>
-                                    <option value="chemical">Chemical Processing</option>
-                                    <option value="power">Power Generation</option>
-                                    <option value="water">Water Treatment</option>
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-3 gap-4">
-                                <button id="generatePDF" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-                                    <i class="fas fa-file-pdf mr-2"></i>PDF Report
-                                </button>
-                                <button id="generateExcel" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                                    <i class="fas fa-file-excel mr-2"></i>Excel Export
-                                </button>
-                                <button id="generateCSV" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                    <i class="fas fa-file-csv mr-2"></i>CSV Export
-                                </button>
+                        <div>
+                            <h4 class="font-medium text-gray-700 mb-2" data-translate="settings.criteria_weights">Criteria Weights</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span data-translate="criteria.safety">Safety</span>
+                                    <input type="range" id="safetyWeight" min="0" max="50" value="25" class="w-32">
+                                    <span id="safetyWeightValue">25%</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span data-translate="criteria.environmental">Environmental</span>
+                                    <input type="range" id="environmentalWeight" min="0" max="50" value="20" class="w-32">
+                                    <span id="environmentalWeightValue">20%</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span data-translate="criteria.production">Production</span>
+                                    <input type="range" id="productionWeight" min="0" max="50" value="25" class="w-32">
+                                    <span id="productionWeightValue">25%</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span data-translate="criteria.financial">Financial</span>
+                                    <input type="range" id="financialWeight" min="0" max="50" value="15" class="w-32">
+                                    <span id="financialWeightValue">15%</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span data-translate="criteria.quality">Quality</span>
+                                    <input type="range" id="qualityWeight" min="0" max="50" value="10" class="w-32">
+                                    <span id="qualityWeightValue">10%</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span data-translate="criteria.reputation">Reputation</span>
+                                    <input type="range" id="reputationWeight" min="0" max="50" value="5" class="w-32">
+                                    <span id="reputationWeightValue">5%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Maintenance Priority Matrix</h3>
-                        <div style="height: 400px;">
-                            <canvas id="priorityMatrix"></canvas>
+                </div>
+                
+                <!-- Regional Settings -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-4" data-translate="settings.regional">Regional Settings</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="settings.default_currency">Default Currency</label>
+                            <select id="defaultCurrency" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="CNY">CNY - Chinese Yuan</option>
+                                <option value="INR">INR - Indian Rupee</option>
+                            </select>
                         </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-lg shadow mt-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Action Plan Summary</h3>
-                    <div id="actionPlanDetails" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Action plan details will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Tab -->
-            <div id="settings" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Impact Criteria Customization</h3>
                         
-                        <div class="space-y-6">
-                            <div>
-                                <h4 class="font-medium text-gray-900 mb-3">Criteria Weights</h4>
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-sm text-gray-700">Safety Impact</label>
-                                        <div class="flex items-center space-x-2">
-                                            <input type="range" id="safetyWeight" min="0" max="100" value="25" class="w-24">
-                                            <span id="safetyWeightValue" class="text-sm font-medium w-8">25%</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-sm text-gray-700">Environmental Impact</label>
-                                        <div class="flex items-center space-x-2">
-                                            <input type="range" id="environmentalWeight" min="0" max="100" value="20" class="w-24">
-                                            <span id="environmentalWeightValue" class="text-sm font-medium w-8">20%</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-sm text-gray-700">Production Impact</label>
-                                        <div class="flex items-center space-x-2">
-                                            <input type="range" id="productionWeight" min="0" max="100" value="25" class="w-24">
-                                            <span id="productionWeightValue" class="text-sm font-medium w-8">25%</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-sm text-gray-700">Financial Impact</label>
-                                        <div class="flex items-center space-x-2">
-                                            <input type="range" id="financialWeight" min="0" max="100" value="20" class="w-24">
-                                            <span id="financialWeightValue" class="text-sm font-medium w-8">20%</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-sm text-gray-700">Quality Impact</label>
-                                        <div class="flex items-center space-x-2">
-                                            <input type="range" id="qualityWeight" min="0" max="100" value="5" class="w-24">
-                                            <span id="qualityWeightValue" class="text-sm font-medium w-8">5%</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <label class="text-sm text-gray-700">Reputation Impact</label>
-                                        <div class="flex items-center space-x-2">
-                                            <input type="range" id="reputationWeight" min="0" max="100" value="5" class="w-24">
-                                            <span id="reputationWeightValue" class="text-sm font-medium w-8">5%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="font-medium text-gray-900 mb-3">Industry Templates</h4>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <button class="industry-template bg-gray-100 p-3 rounded-lg text-sm hover:bg-gray-200" data-template="manufacturing">
-                                        Manufacturing
-                                    </button>
-                                    <button class="industry-template bg-gray-100 p-3 rounded-lg text-sm hover:bg-gray-200" data-template="oil-gas">
-                                        Oil & Gas
-                                    </button>
-                                    <button class="industry-template bg-gray-100 p-3 rounded-lg text-sm hover:bg-gray-200" data-template="pharmaceutical">
-                                        Pharmaceutical
-                                    </button>
-                                    <button class="industry-template bg-gray-100 p-3 rounded-lg text-sm hover:bg-gray-200" data-template="chemical">
-                                        Chemical
-                                    </button>
-                                    <button class="industry-template bg-gray-100 p-3 rounded-lg text-sm hover:bg-gray-200" data-template="power">
-                                        Power Generation
-                                    </button>
-                                    <button class="industry-template bg-gray-100 p-3 rounded-lg text-sm hover:bg-gray-200" data-template="water">
-                                        Water Treatment
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="flex space-x-4">
-                                <button id="saveSettings" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                    Save Settings
-                                </button>
-                                <button id="resetSettings" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
-                                    Reset to Default
-                                </button>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="settings.regulatory_framework">Regulatory Framework</label>
+                            <select id="regulatoryFramework" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="OSHA" data-translate="regulations.osha">OSHA (United States)</option>
+                                <option value="HSE" data-translate="regulations.hse">HSE (United Kingdom)</option>
+                                <option value="DGUV" data-translate="regulations.dguv">DGUV (Germany)</option>
+                                <option value="INRS" data-translate="regulations.inrs">INRS (France)</option>
+                                <option value="INSST" data-translate="regulations.insst">INSST (Spain)</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Impact Level Customization</h3>
                         
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Criteria to Customize</label>
-                                <select id="criteriaSelect" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                                    <option value="safety">Safety Impact Levels</option>
-                                    <option value="environmental">Environmental Impact Levels</option>
-                                    <option value="production">Production Impact Levels</option>
-                                    <option value="financial">Financial Impact Levels</option>
-                                    <option value="quality">Quality Impact Levels</option>
-                                    <option value="reputation">Reputation Impact Levels</option>
-                                </select>
-                            </div>
-
-                            <div id="criteriaEditor" class="space-y-3">
-                                <!-- Criteria levels will be populated here -->
-                            </div>
-
-                            <div class="flex space-x-4">
-                                <button id="updateCriteria" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-                                    Update Criteria
-                                </button>
-                                <button id="previewCriteria" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                    Preview Changes
-                                </button>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="settings.date_format">Date Format</label>
+                            <select id="dateFormat" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="MM/DD/YYYY">MM/DD/YYYY (US)</option>
+                                <option value="DD/MM/YYYY">DD/MM/YYYY (EU)</option>
+                                <option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</option>
+                            </select>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Help Tab -->
-            <div id="help" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2">
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">User Guide</h3>
-                            
-                            <div class="space-y-6">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-2">Getting Started</h4>
-                                    <p class="text-gray-700 mb-2">Follow these steps to perform equipment criticality assessment:</p>
-                                    <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
-                                        <li>Configure your currency and impact criteria in Settings</li>
-                                        <li>Import your asset list using the Import Assets tab</li>
-                                        <li>Use Batch Assessment to score multiple assets efficiently</li>
-                                        <li>Review results in the Dashboard and Asset Management tabs</li>
-                                        <li>Generate professional reports for stakeholders</li>
-                                    </ol>
-                                </div>
-
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-2">Import Assets</h4>
-                                    <p class="text-gray-700 text-sm mb-2">The system supports CSV and Excel file imports with the following requirements:</p>
-                                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                        <li><strong>Required columns:</strong> Asset_ID, Asset_Name, Type, Location</li>
-                                        <li><strong>Optional columns:</strong> Description, Manufacturer, Model, Install_Date, Department</li>
-                                        <li><strong>Scoring columns:</strong> Safety_Score, Environmental_Score, Production_Score, Financial_Score, Quality_Score, Reputation_Score (1-10 scale)</li>
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-2">Scoring Methodology</h4>
-                                    <p class="text-gray-700 text-sm mb-2">Assets are scored across six criteria on a 1-10 scale:</p>
-                                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                        <li><strong>Safety Impact:</strong> Potential harm to personnel</li>
-                                        <li><strong>Environmental Impact:</strong> Environmental consequences of failure</li>
-                                        <li><strong>Production Impact:</strong> Effect on production output</li>
-                                        <li><strong>Financial Impact:</strong> Direct and indirect costs</li>
-                                        <li><strong>Quality Impact:</strong> Effect on product quality</li>
-                                        <li><strong>Reputation Impact:</strong> Brand and stakeholder impact</li>
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-2">Criticality Tiers</h4>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div class="bg-red-50 p-3 rounded-lg">
-                                            <h5 class="font-medium text-red-800">Tier 1 - Critical</h5>
-                                            <p class="text-sm text-red-700">Top 10% of assets requiring immediate attention and real-time monitoring.</p>
-                                        </div>
-                                        <div class="bg-orange-50 p-3 rounded-lg">
-                                            <h5 class="font-medium text-orange-800">Tier 2 - High</h5>
-                                            <p class="text-sm text-orange-700">10-30% of assets needing enhanced maintenance programs.</p>
-                                        </div>
-                                        <div class="bg-yellow-50 p-3 rounded-lg">
-                                            <h5 class="font-medium text-yellow-800">Tier 3 - Medium</h5>
-                                            <p class="text-sm text-yellow-700">30-70% of assets with standard maintenance requirements.</p>
-                                        </div>
-                                        <div class="bg-green-50 p-3 rounded-lg">
-                                            <h5 class="font-medium text-green-800">Tier 4 - Low</h5>
-                                            <p class="text-sm text-green-700">Bottom 30% suitable for run-to-failure strategy.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-1">
-                        <div class="bg-blue-50 p-6 rounded-lg">
-                            <h4 class="font-semibold text-blue-900 mb-4">Condition-Based Monitoring Tools</h4>
-                            <div class="space-y-4 text-sm">
-                                <div>
-                                    <h5 class="font-medium text-blue-800">Tier 1 Critical Assets</h5>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li>• Vibration analysis systems</li>
-                                        <li>• Real-time thermal monitoring</li>
-                                        <li>• Oil analysis programs</li>
-                                        <li>• Motor current signature analysis</li>
-                                        <li>• Ultrasonic monitoring</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h5 class="font-medium text-blue-800">Tier 2 High Priority</h5>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li>• Periodic vibration monitoring</li>
-                                        <li>• Infrared thermography</li>
-                                        <li>• Basic oil analysis</li>
-                                        <li>• Performance trending</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h5 class="font-medium text-blue-800">Tier 3 Medium Priority</h5>
-                                    <ul class="text-blue-700 space-y-1">
-                                        <li>• Visual inspections</li>
-                                        <li>• Basic performance checks</li>
-                                        <li>• Operator care tasks</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-green-50 p-6 rounded-lg mt-6">
-                            <h4 class="font-semibold text-green-900 mb-4">ISO Standards Alignment</h4>
-                            <div class="text-sm text-green-700 space-y-2">
-                                <p><strong>ISO 31000:2018</strong> - Risk Management Guidelines</p>
-                                <p><strong>ISO 14224:2016</strong> - Reliability Data Collection</p>
-                                <p><strong>ISO 55000:2024</strong> - Asset Management</p>
-                                <p class="text-xs mt-2">This system aligns with international standards for risk management and asset criticality assessment.</p>
-                            </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="settings.number_format">Number Format</label>
+                            <select id="numberFormat" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="1,000.00">1,000.00 (US/UK)</option>
+                                <option value="1.000,00">1.000,00 (EU)</option>
+                                <option value="1 000,00">1 000,00 (France)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -755,156 +500,516 @@
     </div>
 
     <script>
-        // Application State
-        let assets = [];
-        let settings = {
-            currency: 'USD',
-            weights: {
-                safety: 25,
-                environmental: 20,
-                production: 25,
-                financial: 20,
-                quality: 5,
-                reputation: 5
+        // Translation System
+        const translations = {
+            en: {
+                'nav.dashboard': 'Dashboard',
+                'nav.import': 'Import Assets',
+                'nav.assessment': 'Batch Assessment',
+                'nav.reports': 'Reports',
+                'nav.settings': 'Settings',
+                'dashboard.total_assets': 'Total Assets',
+                'dashboard.critical_assets': 'Critical Assets',
+                'dashboard.assessed_assets': 'Assessed Assets',
+                'dashboard.criticality_distribution': 'Criticality Distribution',
+                'dashboard.recent_assets': 'Recent Assets',
+                'table.asset_id': 'Asset ID',
+                'table.name': 'Name',
+                'table.type': 'Type',
+                'table.location': 'Location',
+                'table.criticality': 'Criticality',
+                'table.actions': 'Actions',
+                'import.title': 'Import Assets',
+                'import.select_file': 'Select File',
+                'import.download_template': 'Download Template',
+                'import.import_data': 'Import Data',
+                'import.validation_title': 'Import Validation',
+                'import.validation.asset_id': 'Asset ID must be unique',
+                'import.validation.asset_name': 'Asset Name is required',
+                'import.validation.type': 'Type must be one of: Rotating, Fixed, Mobile, Electrical, Instrumentation',
+                'import.validation.location': 'Location should specify facility/area',
+                'import.validation.optional': 'Optional fields: Description, Manufacturer, Model, Install Date',
+                'import.progress': 'Import Progress',
+                'assessment.title': 'Batch Asset Assessment',
+                'assessment.currency': 'Currency',
+                'assessment.filter_type': 'Filter by Type',
+                'assessment.all_types': 'All Types',
+                'assessment.rotating': 'Rotating',
+                'assessment.fixed': 'Fixed',
+                'assessment.mobile': 'Mobile',
+                'assessment.electrical': 'Electrical',
+                'assessment.instrumentation': 'Instrumentation',
+                'assessment.filter_location': 'Filter by Location',
+                'assessment.bulk_assess': 'Bulk Assess',
+                'criteria.safety': 'Safety',
+                'criteria.environmental': 'Environmental',
+                'criteria.production': 'Production',
+                'criteria.financial': 'Financial',
+                'criteria.quality': 'Quality',
+                'criteria.reputation': 'Reputation',
+                'reports.generation': 'Report Generation',
+                'reports.type': 'Report Type',
+                'reports.comprehensive': 'Comprehensive Assessment Report',
+                'reports.executive': 'Executive Summary',
+                'reports.maintenance': 'Maintenance Priority List',
+                'reports.department': 'Department-Specific Report',
+                'reports.compliance': 'Compliance Audit Report',
+                'reports.include_assets': 'Include Assets',
+                'reports.all_assets': 'All Assets',
+                'reports.critical_only': 'Critical Assets Only',
+                'reports.selected_only': 'Selected Assets Only',
+                'reports.company_name': 'Company Name',
+                'reports.generate_pdf': 'Generate PDF Report',
+                'reports.priority_matrix': 'Maintenance Priority Matrix',
+                'reports.action_plan': 'Action Plan Summary',
+                'tiers.tier1': 'Tier 1 - Critical',
+                'tiers.tier2': 'Tier 2 - High',
+                'tiers.tier3': 'Tier 3 - Medium',
+                'tiers.tier4': 'Tier 4 - Low',
+                'actions.tier1.predictive': '• Predictive maintenance programs',
+                'actions.tier1.realtime': '• Real-time monitoring systems',
+                'actions.tier1.redundancy': '• Redundancy assessment',
+                'actions.tier1.emergency': '• Emergency response procedures',
+                'actions.tier2.risk_based': '• Risk-based inspections',
+                'actions.tier2.scheduled': '• Scheduled PdM activities',
+                'actions.tier2.enhanced': '• Enhanced PM programs',
+                'actions.tier2.failure_analysis': '• Failure mode analysis',
+                'actions.tier3.preventive': '• Standard preventive maintenance',
+                'actions.tier3.basic_monitoring': '• Basic condition monitoring',
+                'actions.tier3.oem': '• OEM recommended maintenance',
+                'actions.tier3.spare_parts': '• Standard spare parts inventory',
+                'actions.tier4.run_to_failure': '• Run-to-failure strategy',
+                'actions.tier4.minimal': '• Minimal intervention',
+                'actions.tier4.safety_checks': '• Safety checks only',
+                'actions.tier4.cost_optimization': '• Cost optimization focus',
+                'settings.criteria_customization': 'Impact Criteria Customization',
+                'settings.industry_template': 'Industry Template',
+                'settings.criteria_weights': 'Criteria Weights',
+                'settings.regional': 'Regional Settings',
+                'settings.default_currency': 'Default Currency',
+                'settings.regulatory_framework': 'Regulatory Framework',
+                'settings.date_format': 'Date Format',
+                'settings.number_format': 'Number Format',
+                'industries.manufacturing': 'Manufacturing',
+                'industries.oil_gas': 'Oil & Gas',
+                'industries.chemical': 'Chemical Processing',
+                'industries.pharmaceutical': 'Pharmaceutical',
+                'industries.power': 'Power Generation',
+                'industries.water': 'Water Treatment',
+                'industries.food': 'Food & Beverage',
+                'regulations.osha': 'OSHA (United States)',
+                'regulations.hse': 'HSE (United Kingdom)',
+                'regulations.dguv': 'DGUV (Germany)',
+                'regulations.inrs': 'INRS (France)',
+                'regulations.insst': 'INSST (Spain)'
             },
-            criteria: {
-                safety: {
-                    1: 'No safety impact',
-                    2: 'Minor safety concern',
-                    3: 'Potential minor injury',
-                    4: 'First aid injury potential',
-                    5: 'Medical treatment required',
-                    6: 'OSHA recordable injury',
-                    7: 'Lost time injury potential',
-                    8: 'Serious injury potential',
-                    9: 'Life-threatening situation',
-                    10: 'Fatality potential'
-                },
-                environmental: {
-                    1: 'No environmental impact',
-                    2: 'Minimal environmental concern',
-                    3: 'Minor on-site impact',
-                    4: 'Contained on-site release',
-                    5: 'Small off-site impact',
-                    6: 'Reportable quantity release',
-                    7: 'Significant environmental damage',
-                    8: 'Major environmental incident',
-                    9: 'Severe ecosystem impact',
-                    10: 'Catastrophic environmental damage'
-                },
-                production: {
-                    1: 'No production impact',
-                    2: 'Minimal production delay (<15 min)',
-                    3: 'Minor delay (15-60 min)',
-                    4: 'Moderate delay (1-4 hours)',
-                    5: 'Significant delay (4-8 hours)',
-                    6: 'Major delay (8-24 hours)',
-                    7: 'Production shutdown (1-3 days)',
-                    8: 'Extended shutdown (3-7 days)',
-                    9: 'Long-term shutdown (1-4 weeks)',
-                    10: 'Catastrophic shutdown (>1 month)'
-                },
-                quality: {
-                    1: 'No quality impact',
-                    2: 'Minimal quality variation',
-                    3: 'Minor quality deviation',
-                    4: 'Quality concern requiring attention',
-                    5: 'Product rework required',
-                    6: 'Product quarantine potential',
-                    7: 'Customer complaint risk',
-                    8: 'Product recall potential',
-                    9: 'Regulatory non-compliance',
-                    10: 'Safety/efficacy impact to end users'
-                },
-                reputation: {
-                    1: 'No reputation impact',
-                    2: 'Minimal internal concern',
-                    3: 'Minor internal complaint',
-                    4: 'Local stakeholder concern',
-                    5: 'Customer complaint',
-                    6: 'Regional reputation impact',
-                    7: 'Industry-wide attention',
-                    8: 'National media coverage',
-                    9: 'International attention',
-                    10: 'Severe brand damage'
-                }
+            fr: {
+                'nav.dashboard': 'Tableau de bord',
+                'nav.import': 'Importer des actifs',
+                'nav.assessment': 'Évaluation par lots',
+                'nav.reports': 'Rapports',
+                'nav.settings': 'Paramètres',
+                'dashboard.total_assets': 'Total des actifs',
+                'dashboard.critical_assets': 'Actifs critiques',
+                'dashboard.assessed_assets': 'Actifs évalués',
+                'dashboard.criticality_distribution': 'Distribution de criticité',
+                'dashboard.recent_assets': 'Actifs récents',
+                'table.asset_id': 'ID Actif',
+                'table.name': 'Nom',
+                'table.type': 'Type',
+                'table.location': 'Emplacement',
+                'table.criticality': 'Criticité',
+                'table.actions': 'Actions',
+                'import.title': 'Importer des actifs',
+                'import.select_file': 'Sélectionner un fichier',
+                'import.download_template': 'Télécharger le modèle',
+                'import.import_data': 'Importer les données',
+                'import.validation_title': 'Validation d\'importation',
+                'import.validation.asset_id': 'L\'ID de l\'actif doit être unique',
+                'import.validation.asset_name': 'Le nom de l\'actif est requis',
+                'import.validation.type': 'Le type doit être : Rotatif, Fixe, Mobile, Électrique, Instrumentation',
+                'import.validation.location': 'L\'emplacement doit spécifier l\'installation/zone',
+                'import.validation.optional': 'Champs optionnels : Description, Fabricant, Modèle, Date d\'installation',
+                'import.progress': 'Progression de l\'importation',
+                'assessment.title': 'Évaluation par lots des actifs',
+                'assessment.currency': 'Devise',
+                'assessment.filter_type': 'Filtrer par type',
+                'assessment.all_types': 'Tous les types',
+                'assessment.rotating': 'Rotatif',
+                'assessment.fixed': 'Fixe',
+                'assessment.mobile': 'Mobile',
+                'assessment.electrical': 'Électrique',
+                'assessment.instrumentation': 'Instrumentation',
+                'assessment.filter_location': 'Filtrer par emplacement',
+                'assessment.bulk_assess': 'Évaluation en masse',
+                'criteria.safety': 'Sécurité',
+                'criteria.environmental': 'Environnemental',
+                'criteria.production': 'Production',
+                'criteria.financial': 'Financier',
+                'criteria.quality': 'Qualité',
+                'criteria.reputation': 'Réputation',
+                'reports.generation': 'Génération de rapports',
+                'reports.type': 'Type de rapport',
+                'reports.comprehensive': 'Rapport d\'évaluation complet',
+                'reports.executive': 'Résumé exécutif',
+                'reports.maintenance': 'Liste de priorités de maintenance',
+                'reports.department': 'Rapport spécifique au département',
+                'reports.compliance': 'Rapport d\'audit de conformité',
+                'reports.include_assets': 'Inclure les actifs',
+                'reports.all_assets': 'Tous les actifs',
+                'reports.critical_only': 'Actifs critiques uniquement',
+                'reports.selected_only': 'Actifs sélectionnés uniquement',
+                'reports.company_name': 'Nom de l\'entreprise',
+                'reports.generate_pdf': 'Générer un rapport PDF',
+                'reports.priority_matrix': 'Matrice de priorité de maintenance',
+                'reports.action_plan': 'Résumé du plan d\'action',
+                'tiers.tier1': 'Niveau 1 - Critique',
+                'tiers.tier2': 'Niveau 2 - Élevé',
+                'tiers.tier3': 'Niveau 3 - Moyen',
+                'tiers.tier4': 'Niveau 4 - Faible',
+                'actions.tier1.predictive': '• Programmes de maintenance prédictive',
+                'actions.tier1.realtime': '• Systèmes de surveillance en temps réel',
+                'actions.tier1.redundancy': '• Évaluation de la redondance',
+                'actions.tier1.emergency': '• Procédures d\'intervention d\'urgence',
+                'actions.tier2.risk_based': '• Inspections basées sur les risques',
+                'actions.tier2.scheduled': '• Activités PdM programmées',
+                'actions.tier2.enhanced': '• Programmes PM améliorés',
+                'actions.tier2.failure_analysis': '• Analyse des modes de défaillance',
+                'actions.tier3.preventive': '• Maintenance préventive standard',
+                'actions.tier3.basic_monitoring': '• Surveillance d\'état de base',
+                'actions.tier3.oem': '• Maintenance recommandée par le fabricant',
+                'actions.tier3.spare_parts': '• Inventaire de pièces de rechange standard',
+                'actions.tier4.run_to_failure': '• Stratégie de fonctionnement jusqu\'à panne',
+                'actions.tier4.minimal': '• Intervention minimale',
+                'actions.tier4.safety_checks': '• Contrôles de sécurité uniquement',
+                'actions.tier4.cost_optimization': '• Focus sur l\'optimisation des coûts',
+                'settings.criteria_customization': 'Personnalisation des critères d\'impact',
+                'settings.industry_template': 'Modèle d\'industrie',
+                'settings.criteria_weights': 'Poids des critères',
+                'settings.regional': 'Paramètres régionaux',
+                'settings.default_currency': 'Devise par défaut',
+                'settings.regulatory_framework': 'Cadre réglementaire',
+                'settings.date_format': 'Format de date',
+                'settings.number_format': 'Format de nombre',
+                'industries.manufacturing': 'Fabrication',
+                'industries.oil_gas': 'Pétrole et gaz',
+                'industries.chemical': 'Traitement chimique',
+                'industries.pharmaceutical': 'Pharmaceutique',
+                'industries.power': 'Production d\'énergie',
+                'industries.water': 'Traitement de l\'eau',
+                'industries.food': 'Alimentation et boissons',
+                'regulations.osha': 'OSHA (États-Unis)',
+                'regulations.hse': 'HSE (Royaume-Uni)',
+                'regulations.dguv': 'DGUV (Allemagne)',
+                'regulations.inrs': 'INRS (France)',
+                'regulations.insst': 'INSST (Espagne)'
+            },
+            de: {
+                'nav.dashboard': 'Dashboard',
+                'nav.import': 'Anlagen importieren',
+                'nav.assessment': 'Batch-Bewertung',
+                'nav.reports': 'Berichte',
+                'nav.settings': 'Einstellungen',
+                'dashboard.total_assets': 'Gesamtanlagen',
+                'dashboard.critical_assets': 'Kritische Anlagen',
+                'dashboard.assessed_assets': 'Bewertete Anlagen',
+                'dashboard.criticality_distribution': 'Kritikalitätsverteilung',
+                'dashboard.recent_assets': 'Aktuelle Anlagen',
+                'table.asset_id': 'Anlagen-ID',
+                'table.name': 'Name',
+                'table.type': 'Typ',
+                'table.location': 'Standort',
+                'table.criticality': 'Kritikalität',
+                'table.actions': 'Aktionen',
+                'import.title': 'Anlagen importieren',
+                'import.select_file': 'Datei auswählen',
+                'import.download_template': 'Vorlage herunterladen',
+                'import.import_data': 'Daten importieren',
+                'import.validation_title': 'Import-Validierung',
+                'import.validation.asset_id': 'Anlagen-ID muss eindeutig sein',
+                'import.validation.asset_name': 'Anlagenname ist erforderlich',
+                'import.validation.type': 'Typ muss sein: Rotierend, Fest, Mobil, Elektrisch, Instrumentierung',
+                'import.validation.location': 'Standort sollte Anlage/Bereich spezifizieren',
+                'import.validation.optional': 'Optionale Felder: Beschreibung, Hersteller, Modell, Installationsdatum',
+                'import.progress': 'Import-Fortschritt',
+                'assessment.title': 'Batch-Anlagenbewertung',
+                'assessment.currency': 'Währung',
+                'assessment.filter_type': 'Nach Typ filtern',
+                'assessment.all_types': 'Alle Typen',
+                'assessment.rotating': 'Rotierend',
+                'assessment.fixed': 'Fest',
+                'assessment.mobile': 'Mobil',
+                'assessment.electrical': 'Elektrisch',
+                'assessment.instrumentation': 'Instrumentierung',
+                'assessment.filter_location': 'Nach Standort filtern',
+                'assessment.bulk_assess': 'Massenbewertung',
+                'criteria.safety': 'Sicherheit',
+                'criteria.environmental': 'Umwelt',
+                'criteria.production': 'Produktion',
+                'criteria.financial': 'Finanziell',
+                'criteria.quality': 'Qualität',
+                'criteria.reputation': 'Ruf',
+                'reports.generation': 'Berichtserstellung',
+                'reports.type': 'Berichtstyp',
+                'reports.comprehensive': 'Umfassender Bewertungsbericht',
+                'reports.executive': 'Zusammenfassung für Führungskräfte',
+                'reports.maintenance': 'Wartungsprioritätenliste',
+                'reports.department': 'Abteilungsspezifischer Bericht',
+                'reports.compliance': 'Compliance-Auditbericht',
+                'reports.include_assets': 'Anlagen einschließen',
+                'reports.all_assets': 'Alle Anlagen',
+                'reports.critical_only': 'Nur kritische Anlagen',
+                'reports.selected_only': 'Nur ausgewählte Anlagen',
+                'reports.company_name': 'Firmenname',
+                'reports.generate_pdf': 'PDF-Bericht erstellen',
+                'reports.priority_matrix': 'Wartungsprioritäten-Matrix',
+                'reports.action_plan': 'Aktionsplan-Zusammenfassung',
+                'tiers.tier1': 'Stufe 1 - Kritisch',
+                'tiers.tier2': 'Stufe 2 - Hoch',
+                'tiers.tier3': 'Stufe 3 - Mittel',
+                'tiers.tier4': 'Stufe 4 - Niedrig',
+                'actions.tier1.predictive': '• Vorausschauende Wartungsprogramme',
+                'actions.tier1.realtime': '• Echtzeit-Überwachungssysteme',
+                'actions.tier1.redundancy': '• Redundanzbewertung',
+                'actions.tier1.emergency': '• Notfallverfahren',
+                'actions.tier2.risk_based': '• Risikobasierte Inspektionen',
+                'actions.tier2.scheduled': '• Geplante PdM-Aktivitäten',
+                'actions.tier2.enhanced': '• Erweiterte PM-Programme',
+                'actions.tier2.failure_analysis': '• Ausfallmodusanalyse',
+                'actions.tier3.preventive': '• Standard-Vorbeugungswartung',
+                'actions.tier3.basic_monitoring': '• Grundlegende Zustandsüberwachung',
+                'actions.tier3.oem': '• Vom Hersteller empfohlene Wartung',
+                'actions.tier3.spare_parts': '• Standard-Ersatzteilinventar',
+                'actions.tier4.run_to_failure': '• Laufzeit-bis-Ausfall-Strategie',
+                'actions.tier4.minimal': '• Minimale Intervention',
+                'actions.tier4.safety_checks': '• Nur Sicherheitsprüfungen',
+                'actions.tier4.cost_optimization': '• Fokus auf Kostenoptimierung',
+                'settings.criteria_customization': 'Anpassung der Auswirkungskriterien',
+                'settings.industry_template': 'Branchenvorlage',
+                'settings.criteria_weights': 'Kriteriengewichtung',
+                'settings.regional': 'Regionale Einstellungen',
+                'settings.default_currency': 'Standardwährung',
+                'settings.regulatory_framework': 'Regulatorischer Rahmen',
+                'settings.date_format': 'Datumsformat',
+                'settings.number_format': 'Zahlenformat',
+                'industries.manufacturing': 'Fertigung',
+                'industries.oil_gas': 'Öl & Gas',
+                'industries.chemical': 'Chemische Verarbeitung',
+                'industries.pharmaceutical': 'Pharmazeutisch',
+                'industries.power': 'Energieerzeugung',
+                'industries.water': 'Wasseraufbereitung',
+                'industries.food': 'Lebensmittel & Getränke',
+                'regulations.osha': 'OSHA (Vereinigte Staaten)',
+                'regulations.hse': 'HSE (Vereinigtes Königreich)',
+                'regulations.dguv': 'DGUV (Deutschland)',
+                'regulations.inrs': 'INRS (Frankreich)',
+                'regulations.insst': 'INSST (Spanien)'
+            },
+            es: {
+                'nav.dashboard': 'Panel de control',
+                'nav.import': 'Importar activos',
+                'nav.assessment': 'Evaluación por lotes',
+                'nav.reports': 'Informes',
+                'nav.settings': 'Configuración',
+                'dashboard.total_assets': 'Activos totales',
+                'dashboard.critical_assets': 'Activos críticos',
+                'dashboard.assessed_assets': 'Activos evaluados',
+                'dashboard.criticality_distribution': 'Distribución de criticidad',
+                'dashboard.recent_assets': 'Activos recientes',
+                'table.asset_id': 'ID Activo',
+                'table.name': 'Nombre',
+                'table.type': 'Tipo',
+                'table.location': 'Ubicación',
+                'table.criticality': 'Criticidad',
+                'table.actions': 'Acciones',
+                'import.title': 'Importar activos',
+                'import.select_file': 'Seleccionar archivo',
+                'import.download_template': 'Descargar plantilla',
+                'import.import_data': 'Importar datos',
+                'import.validation_title': 'Validación de importación',
+                'import.validation.asset_id': 'El ID del activo debe ser único',
+                'import.validation.asset_name': 'El nombre del activo es requerido',
+                'import.validation.type': 'El tipo debe ser: Rotativo, Fijo, Móvil, Eléctrico, Instrumentación',
+                'import.validation.location': 'La ubicación debe especificar instalación/área',
+                'import.validation.optional': 'Campos opcionales: Descripción, Fabricante, Modelo, Fecha de instalación',
+                'import.progress': 'Progreso de importación',
+                'assessment.title': 'Evaluación por lotes de activos',
+                'assessment.currency': 'Moneda',
+                'assessment.filter_type': 'Filtrar por tipo',
+                'assessment.all_types': 'Todos los tipos',
+                'assessment.rotating': 'Rotativo',
+                'assessment.fixed': 'Fijo',
+                'assessment.mobile': 'Móvil',
+                'assessment.electrical': 'Eléctrico',
+                'assessment.instrumentation': 'Instrumentación',
+                'assessment.filter_location': 'Filtrar por ubicación',
+                'assessment.bulk_assess': 'Evaluación masiva',
+                'criteria.safety': 'Seguridad',
+                'criteria.environmental': 'Ambiental',
+                'criteria.production': 'Producción',
+                'criteria.financial': 'Financiero',
+                'criteria.quality': 'Calidad',
+                'criteria.reputation': 'Reputación',
+                'reports.generation': 'Generación de informes',
+                'reports.type': 'Tipo de informe',
+                'reports.comprehensive': 'Informe de evaluación integral',
+                'reports.executive': 'Resumen ejecutivo',
+                'reports.maintenance': 'Lista de prioridades de mantenimiento',
+                'reports.department': 'Informe específico del departamento',
+                'reports.compliance': 'Informe de auditoría de cumplimiento',
+                'reports.include_assets': 'Incluir activos',
+                'reports.all_assets': 'Todos los activos',
+                'reports.critical_only': 'Solo activos críticos',
+                'reports.selected_only': 'Solo activos seleccionados',
+                'reports.company_name': 'Nombre de la empresa',
+                'reports.generate_pdf': 'Generar informe PDF',
+                'reports.priority_matrix': 'Matriz de prioridad de mantenimiento',
+                'reports.action_plan': 'Resumen del plan de acción',
+                'tiers.tier1': 'Nivel 1 - Crítico',
+                'tiers.tier2': 'Nivel 2 - Alto',
+                'tiers.tier3': 'Nivel 3 - Medio',
+                'tiers.tier4': 'Nivel 4 - Bajo',
+                'actions.tier1.predictive': '• Programas de mantenimiento predictivo',
+                'actions.tier1.realtime': '• Sistemas de monitoreo en tiempo real',
+                'actions.tier1.redundancy': '• Evaluación de redundancia',
+                'actions.tier1.emergency': '• Procedimientos de respuesta de emergencia',
+                'actions.tier2.risk_based': '• Inspecciones basadas en riesgo',
+                'actions.tier2.scheduled': '• Actividades PdM programadas',
+                'actions.tier2.enhanced': '• Programas PM mejorados',
+                'actions.tier2.failure_analysis': '• Análisis de modos de falla',
+                'actions.tier3.preventive': '• Mantenimiento preventivo estándar',
+                'actions.tier3.basic_monitoring': '• Monitoreo de condición básico',
+                'actions.tier3.oem': '• Mantenimiento recomendado por el fabricante',
+                'actions.tier3.spare_parts': '• Inventario estándar de repuestos',
+                'actions.tier4.run_to_failure': '• Estrategia de funcionamiento hasta falla',
+                'actions.tier4.minimal': '• Intervención mínima',
+                'actions.tier4.safety_checks': '• Solo verificaciones de seguridad',
+                'actions.tier4.cost_optimization': '• Enfoque en optimización de costos',
+                'settings.criteria_customization': 'Personalización de criterios de impacto',
+                'settings.industry_template': 'Plantilla de industria',
+                'settings.criteria_weights': 'Pesos de criterios',
+                'settings.regional': 'Configuración regional',
+                'settings.default_currency': 'Moneda predeterminada',
+                'settings.regulatory_framework': 'Marco regulatorio',
+                'settings.date_format': 'Formato de fecha',
+                'settings.number_format': 'Formato de número',
+                'industries.manufacturing': 'Manufactura',
+                'industries.oil_gas': 'Petróleo y gas',
+                'industries.chemical': 'Procesamiento químico',
+                'industries.pharmaceutical': 'Farmacéutico',
+                'industries.power': 'Generación de energía',
+                'industries.water': 'Tratamiento de agua',
+                'industries.food': 'Alimentos y bebidas',
+                'regulations.osha': 'OSHA (Estados Unidos)',
+                'regulations.hse': 'HSE (Reino Unido)',
+                'regulations.dguv': 'DGUV (Alemania)',
+                'regulations.inrs': 'INRS (Francia)',
+                'regulations.insst': 'INSST (España)'
             }
         };
 
-        // Currency symbols mapping
-        const currencySymbols = {
-            'USD': '$', 'EUR': '€', 'GBP': '£', 'CAD': '$',
-            'AUD': '$', 'JPY': '¥', 'CNY': '¥', 'INR': '₹'
-        };
+        // Global variables
+        let currentLanguage = 'en';
+        let assets = [];
+        let criticalityChart = null;
+        let priorityMatrix = null;
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            initializeLanguage();
             initializeTabs();
             initializeCharts();
             initializeEventListeners();
             loadSampleData();
-            updateDashboard();
         });
 
-        // Tab functionality
+        // Language Management
+        function initializeLanguage() {
+            const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
+            setLanguage(savedLanguage);
+            document.getElementById('languageSelector').value = savedLanguage;
+        }
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('selectedLanguage', lang);
+            
+            // Update all translatable elements
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+
+            // Update main title
+            const titles = {
+                en: 'Equipment Criticality Assessment System',
+                fr: 'Système d\'évaluation de la criticité des équipements',
+                de: 'System zur Bewertung der Anlagenkritikalität',
+                es: 'Sistema de evaluación de criticidad de equipos'
+            };
+            document.getElementById('main-title').textContent = titles[lang];
+
+            // Update currency based on language
+            updateCurrencyByLanguage(lang);
+        }
+
+        function updateCurrencyByLanguage(lang) {
+            const currencyMap = {
+                en: 'USD',
+                fr: 'EUR',
+                de: 'EUR',
+                es: 'EUR'
+            };
+            
+            const currencySelect = document.getElementById('currencySelect');
+            const defaultCurrency = document.getElementById('defaultCurrency');
+            
+            if (currencySelect) currencySelect.value = currencyMap[lang];
+            if (defaultCurrency) defaultCurrency.value = currencyMap[lang];
+        }
+
+        // Tab Management
         function initializeTabs() {
-            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabButtons = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
 
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const targetTab = btn.getAttribute('data-tab');
-
-                    // Remove active class from all tabs and buttons
-                    tabBtns.forEach(b => {
-                        b.classList.remove('active', 'border-blue-500', 'text-blue-600');
-                        b.classList.add('border-transparent', 'text-gray-500');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.getAttribute('data-tab');
+                    
+                    // Update button states
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('bg-blue-600', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
                     });
+                    button.classList.remove('bg-gray-200', 'text-gray-700');
+                    button.classList.add('bg-blue-600', 'text-white');
+                    
+                    // Update content visibility
                     tabContents.forEach(content => {
                         content.classList.remove('active');
                     });
-
-                    // Add active class to clicked button and corresponding content
-                    btn.classList.add('active', 'border-blue-500', 'text-blue-600');
-                    btn.classList.remove('border-transparent', 'text-gray-500');
                     document.getElementById(targetTab).classList.add('active');
                 });
             });
         }
 
-        // Chart initialization
+        // Chart Initialization
         function initializeCharts() {
             // Criticality Distribution Chart
             const ctx1 = document.getElementById('criticalityChart').getContext('2d');
-            window.criticalityChart = new Chart(ctx1, {
+            criticalityChart = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Critical', 'High', 'Medium', 'Low'],
+                    labels: ['Tier 1 - Critical', 'Tier 2 - High', 'Tier 3 - Medium', 'Tier 4 - Low'],
                     datasets: [{
                         data: [0, 0, 0, 0],
-                        backgroundColor: ['#DC2626', '#EA580C', '#D97706', '#16A34A']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Equipment Type Chart
-            const ctx2 = document.getElementById('typeChart').getContext('2d');
-            window.typeChart = new Chart(ctx2, {
-                type: 'pie',
-                data: {
-                    labels: ['Rotating', 'Fixed', 'Mobile', 'Electrical', 'Instrumentation'],
-                    datasets: [{
-                        data: [0, 0, 0, 0, 0],
-                        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+                        backgroundColor: ['#dc2626', '#f59e0b', '#eab308', '#22c55e'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
                     }]
                 },
                 options: {
@@ -919,27 +1024,11 @@
             });
 
             // Priority Matrix Chart
-            const ctx3 = document.getElementById('priorityMatrix').getContext('2d');
-            window.priorityMatrix = new Chart(ctx3, {
+            const ctx2 = document.getElementById('priorityMatrix').getContext('2d');
+            priorityMatrix = new Chart(ctx2, {
                 type: 'scatter',
                 data: {
-                    datasets: [{
-                        label: 'Critical',
-                        data: [],
-                        backgroundColor: '#DC2626'
-                    }, {
-                        label: 'High',
-                        data: [],
-                        backgroundColor: '#EA580C'
-                    }, {
-                        label: 'Medium',
-                        data: [],
-                        backgroundColor: '#D97706'
-                    }, {
-                        label: 'Low',
-                        data: [],
-                        backgroundColor: '#16A34A'
-                    }]
+                    datasets: []
                 },
                 options: {
                     responsive: true,
@@ -948,7 +1037,7 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Probability of Failure'
+                                text: 'Failure Probability'
                             },
                             min: 0,
                             max: 10
@@ -956,1038 +1045,410 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Consequence of Failure'
+                                text: 'Impact Severity'
                             },
                             min: 0,
                             max: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
                 }
             });
         }
 
-        // Event listeners
+        // Event Listeners
         function initializeEventListeners() {
-            // File input
-            document.getElementById('fileInput').addEventListener('change', handleFileImport);
-            
-            // Template downloads
-            document.getElementById('downloadTemplate').addEventListener('click', downloadCSVTemplate);
-            document.getElementById('downloadExcelTemplate').addEventListener('click', downloadExcelTemplate);
-            
-            // Import buttons
-            document.getElementById('confirmImport').addEventListener('click', confirmImport);
-            document.getElementById('cancelImport').addEventListener('click', cancelImport);
-            
-            // Batch operations
-            document.getElementById('executeBatch').addEventListener('click', executeBatchOperation);
-            document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
-            
-            // Currency change
-            document.getElementById('currencySelect').addEventListener('change', updateCurrency);
-            
-            // Settings
-            setupWeightSliders();
-            document.getElementById('saveSettings').addEventListener('click', saveSettings);
-            document.getElementById('resetSettings').addEventListener('click', resetSettings);
-            
-            // Industry templates
-            document.querySelectorAll('.industry-template').forEach(btn => {
-                btn.addEventListener('click', () => applyIndustryTemplate(btn.dataset.template));
+            // Language selector
+            document.getElementById('languageSelector').addEventListener('change', function() {
+                setLanguage(this.value);
             });
-            
-            // Criteria customization
-            document.getElementById('criteriaSelect').addEventListener('change', loadCriteriaEditor);
-            document.getElementById('updateCriteria').addEventListener('click', updateCriteria);
-            
+
+            // File import
+            document.getElementById('downloadTemplate').addEventListener('click', downloadTemplate);
+            document.getElementById('importButton').addEventListener('click', importAssets);
+
+            // Assessment controls
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#assessmentTableBody input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+
+            document.getElementById('bulkAssessBtn').addEventListener('click', bulkAssess);
+
             // Report generation
-            document.getElementById('generatePDF').addEventListener('click', generatePDFReport);
-            document.getElementById('generateExcel').addEventListener('click', generateExcelReport);
-            document.getElementById('generateCSV').addEventListener('click', generateCSVReport);
-            
-            // Asset management
-            document.getElementById('addAsset').addEventListener('click', showAddAssetForm);
-            
-            // Search and filter
-            document.getElementById('searchAssets').addEventListener('input', filterAssets);
-            document.getElementById('filterType').addEventListener('change', filterAssets);
-            document.getElementById('filterCriticality').addEventListener('change', filterAssets);
+            document.getElementById('generateReport').addEventListener('click', generateReport);
+
+            // Settings weight sliders
+            const weightSliders = ['safety', 'environmental', 'production', 'financial', 'quality', 'reputation'];
+            weightSliders.forEach(criterion => {
+                const slider = document.getElementById(criterion + 'Weight');
+                const value = document.getElementById(criterion + 'WeightValue');
+                
+                slider.addEventListener('input', function() {
+                    value.textContent = this.value + '%';
+                });
+            });
         }
 
-        // Load sample data
+        // Sample Data
         function loadSampleData() {
             const sampleAssets = [
                 {
                     id: 'P-001',
-                    name: 'Primary Process Pump',
+                    name: 'Primary Pump A',
                     type: 'Rotating',
-                    location: 'Production Area A',
-                    description: 'Main process circulation pump',
-                    manufacturer: 'Flowserve',
-                    model: 'VSX-200',
+                    location: 'Plant A - Area 1',
+                    manufacturer: 'Grundfos',
+                    model: 'CR-200',
                     installDate: '2020-01-15',
-                    scores: { safety: 8, environmental: 6, production: 9, financial: 8, quality: 7, reputation: 5 }
+                    safety: 8,
+                    environmental: 6,
+                    production: 9,
+                    financial: 7,
+                    quality: 8,
+                    reputation: 6,
+                    criticality: 0,
+                    tier: 1
                 },
                 {
-                    id: 'V-001',
-                    name: 'Pressure Vessel Tank',
+                    id: 'V-002',
+                    name: 'Storage Tank B',
                     type: 'Fixed',
-                    location: 'Production Area B',
-                    description: 'High pressure storage vessel',
-                    manufacturer: 'ASME',
-                    model: 'PV-500',
-                    installDate: '2019-08-20',
-                    scores: { safety: 9, environmental: 8, production: 7, financial: 9, quality: 6, reputation: 7 }
+                    location: 'Plant A - Area 2',
+                    manufacturer: 'Acme Tanks',
+                    model: 'ST-5000',
+                    installDate: '2019-05-20',
+                    safety: 5,
+                    environmental: 4,
+                    production: 6,
+                    financial: 4,
+                    quality: 5,
+                    reputation: 3,
+                    criticality: 0,
+                    tier: 3
                 },
                 {
-                    id: 'M-001',
-                    name: 'Emergency Generator',
-                    type: 'Mobile',
-                    location: 'Utility Area',
-                    description: 'Backup power generation',
-                    manufacturer: 'Caterpillar',
-                    model: 'C18-500',
+                    id: 'M-003',
+                    name: 'Conveyor Motor C',
+                    type: 'Electrical',
+                    location: 'Plant B - Area 1',
+                    manufacturer: 'Siemens',
+                    model: 'IEC-315',
                     installDate: '2021-03-10',
-                    scores: { safety: 7, environmental: 5, production: 8, financial: 6, quality: 4, reputation: 4 }
+                    safety: 7,
+                    environmental: 3,
+                    production: 8,
+                    financial: 6,
+                    quality: 7,
+                    reputation: 4,
+                    criticality: 0,
+                    tier: 2
                 }
             ];
 
-            assets = sampleAssets.map(asset => ({
-                ...asset,
-                criticality: calculateCriticality(asset.scores),
-                tier: calculateTier(calculateCriticality(asset.scores))
-            }));
-
-            updateAssetTable();
+            assets = sampleAssets;
+            calculateCriticality();
             updateDashboard();
-            updateCharts();
+            updateAssessmentTable();
         }
 
-        // File import handling
-        function handleFileImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let data;
-                    if (file.name.endsWith('.csv')) {
-                        data = parseCSV(e.target.result);
-                    } else {
-                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
-                        const sheetName = workbook.SheetNames[0];
-                        data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                    }
-                    showImportPreview(data);
-                } catch (error) {
-                    alert('Error reading file: ' + error.message);
-                }
+        // Criticality Calculation
+        function calculateCriticality() {
+            const weights = {
+                safety: parseInt(document.getElementById('safetyWeight').value) / 100,
+                environmental: parseInt(document.getElementById('environmentalWeight').value) / 100,
+                production: parseInt(document.getElementById('productionWeight').value) / 100,
+                financial: parseInt(document.getElementById('financialWeight').value) / 100,
+                quality: parseInt(document.getElementById('qualityWeight').value) / 100,
+                reputation: parseInt(document.getElementById('reputationWeight').value) / 100
             };
 
-            if (file.name.endsWith('.csv')) {
-                reader.readAsText(file);
-            } else {
-                reader.readAsBinaryString(file);
-            }
+            assets.forEach(asset => {
+                asset.criticality = (
+                    asset.safety * weights.safety +
+                    asset.environmental * weights.environmental +
+                    asset.production * weights.production +
+                    asset.financial * weights.financial +
+                    asset.quality * weights.quality +
+                    asset.reputation * weights.reputation
+                );
+
+                // Assign tier based on criticality score
+                if (asset.criticality >= 8) asset.tier = 1;
+                else if (asset.criticality >= 6) asset.tier = 2;
+                else if (asset.criticality >= 4) asset.tier = 3;
+                else asset.tier = 4;
+            });
+
+            // Sort by criticality
+            assets.sort((a, b) => b.criticality - a.criticality);
         }
 
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(line => line.trim());
-            const headers = lines[0].split(',').map(h => h.trim());
-            const data = [];
+        // Dashboard Updates
+        function updateDashboard() {
+            document.getElementById('totalAssets').textContent = assets.length;
+            document.getElementById('criticalAssets').textContent = assets.filter(a => a.tier === 1).length;
+            document.getElementById('assessedAssets').textContent = assets.filter(a => a.criticality > 0).length;
 
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim());
-                const row = {};
-                headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
-                });
-                data.push(row);
-            }
-
-            return data;
-        }
-
-        function showImportPreview(data) {
-            const preview = document.getElementById('importPreview');
-            const headers = document.getElementById('previewHeaders');
-            const tbody = document.getElementById('previewData');
-
-            if (data.length === 0) {
-                alert('No data found in file');
-                return;
-            }
-
-            // Show headers
-            headers.innerHTML = '';
-            Object.keys(data[0]).forEach(key => {
-                const th = document.createElement('th');
-                th.className = 'px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase';
-                th.textContent = key;
-                headers.appendChild(th);
+            // Update criticality chart
+            const tierCounts = [0, 0, 0, 0];
+            assets.forEach(asset => {
+                tierCounts[asset.tier - 1]++;
             });
 
-            // Show first 5 rows
-            tbody.innerHTML = '';
-            data.slice(0, 5).forEach(row => {
-                const tr = document.createElement('tr');
-                Object.values(row).forEach(value => {
-                    const td = document.createElement('td');
-                    td.className = 'px-3 py-2 whitespace-nowrap text-sm text-gray-900';
-                    td.textContent = value || '';
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
+            criticalityChart.data.datasets[0].data = tierCounts;
+            criticalityChart.update();
 
-            preview.classList.remove('hidden');
-            window.importData = data;
-        }
-
-        function confirmImport() {
-            if (!window.importData) return;
-
-            const imported = [];
-            const errors = [];
-
-            window.importData.forEach((row, index) => {
-                try {
-                    const asset = validateAndTransformAsset(row, index + 2);
-                    imported.push(asset);
-                } catch (error) {
-                    errors.push(`Row ${index + 2}: ${error.message}`);
-                }
-            });
-
-            if (errors.length > 0) {
-                alert('Import errors:\n' + errors.join('\n'));
-                return;
-            }
-
-            // Add to assets array
-            imported.forEach(asset => {
-                const existingIndex = assets.findIndex(a => a.id === asset.id);
-                if (existingIndex >= 0) {
-                    assets[existingIndex] = asset;
-                } else {
-                    assets.push(asset);
-                }
-            });
-
-            // Update UI
+            // Update asset table
             updateAssetTable();
-            updateDashboard();
-            updateCharts();
-
-            // Show results
-            document.getElementById('importPreview').classList.add('hidden');
-            document.getElementById('importResults').classList.remove('hidden');
-            document.getElementById('importSummary').innerHTML = `
-                <div>Successfully imported ${imported.length} assets</div>
-                ${errors.length > 0 ? `<div class="text-red-600">${errors.length} errors encountered</div>` : ''}
-            `;
-
-            setTimeout(() => {
-                document.getElementById('importResults').classList.add('hidden');
-            }, 5000);
         }
 
-        function validateAndTransformAsset(row, rowNum) {
-            // Required fields
-            if (!row.Asset_ID && !row['Asset ID']) {
-                throw new Error('Asset ID is required');
-            }
-            if (!row.Asset_Name && !row['Asset Name']) {
-                throw new Error('Asset Name is required');
-            }
-            if (!row.Type) {
-                throw new Error('Type is required');
-            }
-            if (!row.Location) {
-                throw new Error('Location is required');
-            }
-
-            // Valid types
-            const validTypes = ['Rotating', 'Fixed', 'Mobile', 'Electrical', 'Instrumentation'];
-            if (!validTypes.includes(row.Type)) {
-                throw new Error(`Type must be one of: ${validTypes.join(', ')}`);
-            }
-
-            const scores = {
-                safety: parseInt(row.Safety_Score || row['Safety Score'] || 5),
-                environmental: parseInt(row.Environmental_Score || row['Environmental Score'] || 5),
-                production: parseInt(row.Production_Score || row['Production Score'] || 5),
-                financial: parseInt(row.Financial_Score || row['Financial Score'] || 5),
-                quality: parseInt(row.Quality_Score || row['Quality Score'] || 5),
-                reputation: parseInt(row.Reputation_Score || row['Reputation Score'] || 5)
-            };
-
-            // Validate scores
-            Object.entries(scores).forEach(([key, value]) => {
-                if (isNaN(value) || value < 1 || value > 10) {
-                    scores[key] = 5; // Default value
-                }
-            });
-
-            const asset = {
-                id: row.Asset_ID || row['Asset ID'],
-                name: row.Asset_Name || row['Asset Name'],
-                type: row.Type,
-                location: row.Location,
-                description: row.Description || '',
-                manufacturer: row.Manufacturer || '',
-                model: row.Model || '',
-                installDate: row.Install_Date || row['Install Date'] || '',
-                department: row.Department || '',
-                scores: scores
-            };
-
-            asset.criticality = calculateCriticality(asset.scores);
-            asset.tier = calculateTier(asset.criticality);
-
-            return asset;
-        }
-
-        function cancelImport() {
-            document.getElementById('importPreview').classList.add('hidden');
-            window.importData = null;
-        }
-
-        // Template downloads
-        function downloadCSVTemplate() {
-            const headers = [
-                'Asset_ID', 'Asset_Name', 'Type', 'Location', 'Description',
-                'Manufacturer', 'Model', 'Install_Date', 'Department',
-                'Safety_Score', 'Environmental_Score', 'Production_Score',
-                'Financial_Score', 'Quality_Score', 'Reputation_Score'
-            ];
-
-            const sampleData = [
-                'P-001', 'Primary Process Pump', 'Rotating', 'Production Area A', 'Main process circulation pump',
-                'Flowserve', 'VSX-200', '2020-01-15', 'Operations',
-                '8', '6', '9', '8', '7', '5'
-            ];
-
-            const csv = headers.join(',') + '\n' + sampleData.join(',');
-            downloadFile(csv, 'asset_import_template.csv', 'text/csv');
-        }
-
-        function downloadExcelTemplate() {
-            const headers = [
-                'Asset_ID', 'Asset_Name', 'Type', 'Location', 'Description',
-                'Manufacturer', 'Model', 'Install_Date', 'Department',
-                'Safety_Score', 'Environmental_Score', 'Production_Score',
-                'Financial_Score', 'Quality_Score', 'Reputation_Score'
-            ];
-
-            const sampleData = [[
-                'P-001', 'Primary Process Pump', 'Rotating', 'Production Area A', 'Main process circulation pump',
-                'Flowserve', 'VSX-200', '2020-01-15', 'Operations',
-                8, 6, 9, 8, 7, 5
-            ]];
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
-            XLSX.utils.book_append_sheet(wb, ws, 'Assets');
-            XLSX.writeFile(wb, 'asset_import_template.xlsx');
-        }
-
-        function downloadFile(content, filename, type) {
-            const blob = new Blob([content], { type: type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // Criticality calculation
-        function calculateCriticality(scores) {
-            const weights = settings.weights;
-            const total = (
-                scores.safety * weights.safety +
-                scores.environmental * weights.environmental +
-                scores.production * weights.production +
-                scores.financial * weights.financial +
-                scores.quality * weights.quality +
-                scores.reputation * weights.reputation
-            ) / 100;
-            return Math.round(total * 10) / 10;
-        }
-
-        function calculateTier(criticality) {
-            if (criticality >= 8.5) return 1;
-            if (criticality >= 7.0) return 2;
-            if (criticality >= 5.0) return 3;
-            return 4;
-        }
-
-        // Update functions
         function updateAssetTable() {
-            const tbody = document.getElementById('assetTable');
+            const tbody = document.getElementById('assetTableBody');
             tbody.innerHTML = '';
 
-            assets.forEach((asset, index) => {
+            assets.slice(0, 10).forEach(asset => {
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                
-                const tierClass = `critcality-tier-${asset.tier}`;
+                const tierClass = `criticality-tier-${asset.tier}`;
                 
                 row.innerHTML = `
-                    <td class="px-3 py-4 whitespace-nowrap">
-                        <input type="checkbox" class="asset-checkbox rounded" data-index="${index}">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${asset.id}</td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">${asset.name}</td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">${asset.type}</td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">${asset.location}</td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <input type="number" min="1" max="10" value="${asset.scores.safety}" 
-                               class="w-16 border border-gray-300 rounded px-2 py-1 text-center"
-                               onchange="updateAssetScore(${index}, 'safety', this.value)">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <input type="number" min="1" max="10" value="${asset.scores.environmental}" 
-                               class="w-16 border border-gray-300 rounded px-2 py-1 text-center"
-                               onchange="updateAssetScore(${index}, 'environmental', this.value)">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <input type="number" min="1" max="10" value="${asset.scores.production}" 
-                               class="w-16 border border-gray-300 rounded px-2 py-1 text-center"
-                               onchange="updateAssetScore(${index}, 'production', this.value)">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <input type="number" min="1" max="10" value="${asset.scores.financial}" 
-                               class="w-16 border border-gray-300 rounded px-2 py-1 text-center"
-                               onchange="updateAssetScore(${index}, 'financial', this.value)">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <input type="number" min="1" max="10" value="${asset.scores.quality}" 
-                               class="w-16 border border-gray-300 rounded px-2 py-1 text-center"
-                               onchange="updateAssetScore(${index}, 'quality', this.value)">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <input type="number" min="1" max="10" value="${asset.scores.reputation}" 
-                               class="w-16 border border-gray-300 rounded px-2 py-1 text-center"
-                               onchange="updateAssetScore(${index}, 'reputation', this.value)">
-                    </td>
-                    <td class="px-3 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tierClass}">
-                            Tier ${asset.tier} (${asset.criticality})
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${asset.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.type}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.location}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${tierClass}">
+                            Tier ${asset.tier}
                         </span>
                     </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="editAsset(${index})" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
-                        <button onclick="deleteAsset(${index})" class="text-red-600 hover:text-red-900">Delete</button>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateAssessmentTable() {
+            const tbody = document.getElementById('assessmentTableBody');
+            tbody.innerHTML = '';
+
+            assets.forEach(asset => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="rounded" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${asset.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="number" min="1" max="10" value="${asset.safety}" class="w-16 p-1 border rounded" data-criterion="safety" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="number" min="1" max="10" value="${asset.environmental}" class="w-16 p-1 border rounded" data-criterion="environmental" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="number" min="1" max="10" value="${asset.production}" class="w-16 p-1 border rounded" data-criterion="production" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="number" min="1" max="10" value="${asset.financial}" class="w-16 p-1 border rounded" data-criterion="financial" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="number" min="1" max="10" value="${asset.quality}" class="w-16 p-1 border rounded" data-criterion="quality" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="number" min="1" max="10" value="${asset.reputation}" class="w-16 p-1 border rounded" data-criterion="reputation" data-asset-id="${asset.id}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full criticality-tier-${asset.tier}">
+                            ${asset.criticality.toFixed(1)}
+                        </span>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
 
-            document.getElementById('assetCount').textContent = assets.length;
-        }
-
-        function updateAssetScore(index, criteria, value) {
-            const score = Math.max(1, Math.min(10, parseInt(value) || 1));
-            assets[index].scores[criteria] = score;
-            assets[index].criticality = calculateCriticality(assets[index].scores);
-            assets[index].tier = calculateTier(assets[index].criticality);
-            
-            // Update the table row
-            const row = document.querySelector(`#assetTable tr:nth-child(${index + 1})`);
-            const tierSpan = row.querySelector('td:nth-last-child(2) span');
-            tierSpan.textContent = `Tier ${assets[index].tier} (${assets[index].criticality})`;
-            tierSpan.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium critcality-tier-${assets[index].tier}`;
-            
-            updateDashboard();
-            updateCharts();
-        }
-
-        function updateDashboard() {
-            const tierCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            assets.forEach(asset => {
-                tierCounts[asset.tier]++;
-            });
-
-            document.getElementById('criticalCount').textContent = tierCounts[1];
-            document.getElementById('highCount').textContent = tierCounts[2];
-            document.getElementById('mediumCount').textContent = tierCounts[3];
-            document.getElementById('lowCount').textContent = tierCounts[4];
-            document.getElementById('totalAssets').textContent = assets.length;
-            document.getElementById('assessedAssets').textContent = assets.filter(a => a.criticality > 0).length;
-            document.getElementById('pendingAssets').textContent = assets.filter(a => a.criticality === 0).length;
-        }
-
-        function updateCharts() {
-            // Update criticality chart
-            const tierCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            assets.forEach(asset => {
-                tierCounts[asset.tier]++;
-            });
-
-            window.criticalityChart.data.datasets[0].data = [
-                tierCounts[1], tierCounts[2], tierCounts[3], tierCounts[4]
-            ];
-            window.criticalityChart.update();
-
-            // Update type chart
-            const typeCounts = { 'Rotating': 0, 'Fixed': 0, 'Mobile': 0, 'Electrical': 0, 'Instrumentation': 0 };
-            assets.forEach(asset => {
-                typeCounts[asset.type]++;
-            });
-
-            window.typeChart.data.datasets[0].data = Object.values(typeCounts);
-            window.typeChart.update();
-
-            // Update priority matrix
-            const matrixData = { 1: [], 2: [], 3: [], 4: [] };
-            assets.forEach(asset => {
-                const avgConsequence = (asset.scores.safety + asset.scores.environmental + asset.scores.production) / 3;
-                const probability = (asset.scores.financial + asset.scores.quality + asset.scores.reputation) / 3;
-                matrixData[asset.tier].push({ x: probability, y: avgConsequence });
-            });
-
-            window.priorityMatrix.data.datasets.forEach((dataset, index) => {
-                dataset.data = matrixData[index + 1];
-            });
-            window.priorityMatrix.update();
-        }
-
-        // Settings functions
-        function setupWeightSliders() {
-            const sliders = ['safety', 'environmental', 'production', 'financial', 'quality', 'reputation'];
-            
-            sliders.forEach(criteria => {
-                const slider = document.getElementById(`${criteria}Weight`);
-                const value = document.getElementById(`${criteria}WeightValue`);
-                
-                slider.addEventListener('input', function() {
-                    const newValue = parseInt(this.value);
-                    value.textContent = newValue + '%';
-                    settings.weights[criteria] = newValue;
+            // Add event listeners to input fields
+            const inputs = tbody.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const assetId = this.getAttribute('data-asset-id');
+                    const criterion = this.getAttribute('data-criterion');
+                    const value = parseInt(this.value);
                     
-                    // Recalculate all criticalities
-                    assets.forEach(asset => {
-                        asset.criticality = calculateCriticality(asset.scores);
-                        asset.tier = calculateTier(asset.criticality);
-                    });
-                    
-                    updateAssetTable();
-                    updateDashboard();
-                    updateCharts();
+                    const asset = assets.find(a => a.id === assetId);
+                    if (asset) {
+                        asset[criterion] = value;
+                        calculateCriticality();
+                        updateDashboard();
+                        updateAssessmentTable();
+                    }
                 });
             });
         }
 
-        function applyIndustryTemplate(template) {
-            const templates = {
-                'manufacturing': { safety: 30, environmental: 15, production: 30, financial: 15, quality: 5, reputation: 5 },
-                'oil-gas': { safety: 35, environmental: 25, production: 20, financial: 15, quality: 3, reputation: 2 },
-                'pharmaceutical': { safety: 25, environmental: 15, production: 20, financial: 15, quality: 20, reputation: 5 },
-                'chemical': { safety: 40, environmental: 30, production: 15, financial: 10, quality: 3, reputation: 2 },
-                'power': { safety: 35, environmental: 20, production: 25, financial: 15, quality: 3, reputation: 2 },
-                'water': { safety: 30, environmental: 35, production: 20, financial: 10, quality: 3, reputation: 2 }
-            };
+        // Import Functions
+        function downloadTemplate() {
+            const template = `Asset ID,Asset Name,Type,Location,Description,Manufacturer,Model,Install Date
+P-001,Primary Pump A,Rotating,Plant A - Area 1,Main process pump,Grundfos,CR-200,2020-01-15
+V-002,Storage Tank B,Fixed,Plant A - Area 2,Chemical storage tank,Acme Tanks,ST-5000,2019-05-20
+M-003,Conveyor Motor C,Electrical,Plant B - Area 1,Conveyor drive motor,Siemens,IEC-315,2021-03-10`;
 
-            const weights = templates[template];
-            if (weights) {
-                Object.entries(weights).forEach(([criteria, value]) => {
-                    settings.weights[criteria] = value;
-                    document.getElementById(`${criteria}Weight`).value = value;
-                    document.getElementById(`${criteria}WeightValue`).textContent = value + '%';
-                });
-
-                // Recalculate criticalities
-                assets.forEach(asset => {
-                    asset.criticality = calculateCriticality(asset.scores);
-                    asset.tier = calculateTier(asset.criticality);
-                });
-
-                updateAssetTable();
-                updateDashboard();
-                updateCharts();
-
-                alert(`Applied ${template} industry template successfully!`);
-            }
+            const blob = new Blob([template], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'asset_import_template.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
         }
 
-        function loadCriteriaEditor() {
-            const criteria = document.getElementById('criteriaSelect').value;
-            const editor = document.getElementById('criteriaEditor');
+        function importAssets() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
             
-            editor.innerHTML = '';
-            
-            for (let i = 1; i <= 10; i++) {
-                const div = document.createElement('div');
-                div.innerHTML = `
-                    <label class="block text-sm font-medium text-gray-700">Level ${i}</label>
-                    <input type="text" id="criteria_${criteria}_${i}" value="${settings.criteria[criteria][i]}" 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                `;
-                editor.appendChild(div);
-            }
-        }
-
-        function updateCriteria() {
-            const criteria = document.getElementById('criteriaSelect').value;
-            
-            for (let i = 1; i <= 10; i++) {
-                const input = document.getElementById(`criteria_${criteria}_${i}`);
-                if (input) {
-                    settings.criteria[criteria][i] = input.value;
-                }
-            }
-            
-            alert('Criteria updated successfully!');
-        }
-
-        function saveSettings() {
-            localStorage.setItem('criticalitySettings', JSON.stringify(settings));
-            alert('Settings saved successfully!');
-        }
-
-        function resetSettings() {
-            if (confirm('Are you sure you want to reset all settings to default?')) {
-                // Reset to default settings
-                settings.weights = { safety: 25, environmental: 20, production: 25, financial: 20, quality: 5, reputation: 5 };
-                
-                // Update sliders
-                Object.entries(settings.weights).forEach(([criteria, value]) => {
-                    document.getElementById(`${criteria}Weight`).value = value;
-                    document.getElementById(`${criteria}WeightValue`).textContent = value + '%';
-                });
-                
-                // Recalculate criticalities
-                assets.forEach(asset => {
-                    asset.criticality = calculateCriticality(asset.scores);
-                    asset.tier = calculateTier(asset.criticality);
-                });
-                
-                updateAssetTable();
-                updateDashboard();
-                updateCharts();
-                
-                alert('Settings reset to default values!');
-            }
-        }
-
-        // Report generation
-        function generatePDFReport() {
-            const reportType = document.getElementById('reportType').value;
-            const companyName = document.getElementById('companyName').value || 'Your Company';
-            const reportTitle = document.getElementById('reportTitle').value || 'Equipment Criticality Assessment Report';
-            
-            // This is a simplified PDF generation - in a real application, you'd use a more robust solution
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Title page
-            doc.setFontSize(20);
-            doc.text(companyName, 105, 30, { align: 'center' });
-            doc.setFontSize(16);
-            doc.text(reportTitle, 105, 50, { align: 'center' });
-            doc.setFontSize(12);
-            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 70, { align: 'center' });
-
-            // Summary statistics
-            doc.setFontSize(14);
-            doc.text('Executive Summary', 20, 100);
-            doc.setFontSize(10);
-            
-            const tierCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            assets.forEach(asset => tierCounts[asset.tier]++);
-            
-            let y = 120;
-            doc.text(`Total Assets Assessed: ${assets.length}`, 20, y);
-            y += 10;
-            doc.text(`Critical Assets (Tier 1): ${tierCounts[1]}`, 20, y);
-            y += 10;
-            doc.text(`High Priority Assets (Tier 2): ${tierCounts[2]}`, 20, y);
-            y += 10;
-            doc.text(`Medium Priority Assets (Tier 3): ${tierCounts[3]}`, 20, y);
-            y += 10;
-            doc.text(`Low Priority Assets (Tier 4): ${tierCounts[4]}`, 20, y);
-
-            // Action plan summary
-            y += 30;
-            doc.setFontSize(14);
-            doc.text('Action Plan Summary', 20, y);
-            doc.setFontSize(10);
-            y += 20;
-
-            const actionPlans = {
-                1: ['Real-time monitoring required', 'Predictive maintenance programs', '24/7 response protocols'],
-                2: ['Condition-based monitoring', 'Enhanced PM programs', 'Priority spare parts'],
-                3: ['Standard PM schedules', 'Routine inspections', 'Standard spare parts'],
-                4: ['Run-to-failure acceptable', 'Basic safety checks', 'Emergency parts only']
-            };
-
-            Object.entries(actionPlans).forEach(([tier, actions]) => {
-                doc.text(`Tier ${tier} Actions:`, 20, y);
-                y += 10;
-                actions.forEach(action => {
-                    doc.text(`• ${action}`, 25, y);
-                    y += 8;
-                });
-                y += 5;
-            });
-
-            doc.save(`${reportTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
-        }
-
-        function generateExcelReport() {
-            const wb = XLSX.utils.book_new();
-            
-            // Assets sheet
-            const assetData = assets.map(asset => ({
-                'Asset ID': asset.id,
-                'Asset Name': asset.name,
-                'Type': asset.type,
-                'Location': asset.location,
-                'Description': asset.description,
-                'Manufacturer': asset.manufacturer,
-                'Model': asset.model,
-                'Install Date': asset.installDate,
-                'Safety Score': asset.scores.safety,
-                'Environmental Score': asset.scores.environmental,
-                'Production Score': asset.scores.production,
-                'Financial Score': asset.scores.financial,
-                'Quality Score': asset.scores.quality,
-                'Reputation Score': asset.scores.reputation,
-                'Criticality Score': asset.criticality,
-                'Criticality Tier': asset.tier
-            }));
-            
-            const ws1 = XLSX.utils.json_to_sheet(assetData);
-            XLSX.utils.book_append_sheet(wb, ws1, 'Assets');
-            
-            // Summary sheet
-            const tierCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            assets.forEach(asset => tierCounts[asset.tier]++);
-            
-            const summaryData = [
-                { Metric: 'Total Assets', Value: assets.length },
-                { Metric: 'Critical Assets (Tier 1)', Value: tierCounts[1] },
-                { Metric: 'High Priority Assets (Tier 2)', Value: tierCounts[2] },
-                { Metric: 'Medium Priority Assets (Tier 3)', Value: tierCounts[3] },
-                { Metric: 'Low Priority Assets (Tier 4)', Value: tierCounts[4] }
-            ];
-            
-            const ws2 = XLSX.utils.json_to_sheet(summaryData);
-            XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
-            
-            XLSX.writeFile(wb, 'criticality_assessment_report.xlsx');
-        }
-
-        function generateCSVReport() {
-            const csvData = assets.map(asset => [
-                asset.id, asset.name, asset.type, asset.location, asset.description,
-                asset.manufacturer, asset.model, asset.installDate,
-                asset.scores.safety, asset.scores.environmental, asset.scores.production,
-                asset.scores.financial, asset.scores.quality, asset.scores.reputation,
-                asset.criticality, asset.tier
-            ]);
-
-            const headers = [
-                'Asset ID', 'Asset Name', 'Type', 'Location', 'Description',
-                'Manufacturer', 'Model', 'Install Date',
-                'Safety Score', 'Environmental Score', 'Production Score',
-                'Financial Score', 'Quality Score', 'Reputation Score',
-                'Criticality Score', 'Criticality Tier'
-            ];
-
-            const csv = [headers, ...csvData].map(row => row.join(',')).join('\n');
-            downloadFile(csv, 'criticality_assessment_data.csv', 'text/csv');
-        }
-
-        // Batch operations
-        function executeBatchOperation() {
-            const operation = document.getElementById('batchOperation').value;
-            const selectedCheckboxes = document.querySelectorAll('.asset-checkbox:checked');
-            
-            if (selectedCheckboxes.length === 0) {
-                alert('Please select assets to operate on');
+            if (!file) {
+                alert('Please select a file to import.');
                 return;
             }
 
-            const selectedIndices = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.index));
-
-            switch (operation) {
-                case 'score':
-                    batchScore(selectedIndices);
-                    break;
-                case 'template':
-                    batchApplyTemplate(selectedIndices);
-                    break;
-                case 'edit':
-                    batchEdit(selectedIndices);
-                    break;
-                case 'delete':
-                    batchDelete(selectedIndices);
-                    break;
-                default:
-                    alert('Please select an operation');
-            }
-        }
-
-        function batchScore(indices) {
-            const scores = {};
-            const criteria = ['safety', 'environmental', 'production', 'financial', 'quality', 'reputation'];
-            
-            criteria.forEach(c => {
-                const score = prompt(`Enter ${c} score (1-10) for selected assets:`);
-                if (score !== null) {
-                    const numScore = Math.max(1, Math.min(10, parseInt(score) || 5));
-                    scores[c] = numScore;
-                }
-            });
-
-            if (Object.keys(scores).length > 0) {
-                indices.forEach(index => {
-                    Object.entries(scores).forEach(([criteria, score]) => {
-                        assets[index].scores[criteria] = score;
-                    });
-                    assets[index].criticality = calculateCriticality(assets[index].scores);
-                    assets[index].tier = calculateTier(assets[index].criticality);
-                });
-
-                updateAssetTable();
-                updateDashboard();
-                updateCharts();
-                alert('Batch scoring completed!');
-            }
-        }
-
-        function batchApplyTemplate(indices) {
-            const template = prompt('Enter equipment type template (Rotating, Fixed, Mobile, Electrical, Instrumentation):');
-            if (!template) return;
-
-            const templates = {
-                'Rotating': { safety: 7, environmental: 5, production: 8, financial: 7, quality: 6, reputation: 4 },
-                'Fixed': { safety: 8, environmental: 7, production: 6, financial: 8, quality: 7, reputation: 5 },
-                'Mobile': { safety: 6, environmental: 4, production: 5, financial: 5, quality: 4, reputation: 3 },
-                'Electrical': { safety: 8, environmental: 3, production: 7, financial: 6, quality: 5, reputation: 4 },
-                'Instrumentation': { safety: 6, environmental: 3, production: 8, financial: 7, quality: 8, reputation: 5 }
-            };
-
-            const scores = templates[template];
-            if (scores) {
-                indices.forEach(index => {
-                    assets[index].scores = { ...scores };
-                    assets[index].criticality = calculateCriticality(assets[index].scores);
-                    assets[index].tier = calculateTier(assets[index].criticality);
-                });
-
-                updateAssetTable();
-                updateDashboard();
-                updateCharts();
-                alert(`Applied ${template} template to selected assets!`);
-            } else {
-                alert('Invalid template type');
-            }
-        }
-
-        function batchEdit(indices) {
-            const field = prompt('Enter field to edit (location, manufacturer, model, department):');
-            if (!field) return;
-
-            const value = prompt(`Enter new ${field} value:`);
-            if (value === null) return;
-
-            indices.forEach(index => {
-                assets[index][field] = value;
-            });
-
-            updateAssetTable();
-            alert(`Updated ${field} for selected assets!`);
-        }
-
-        function batchDelete(indices) {
-            if (confirm(`Are you sure you want to delete ${indices.length} assets?`)) {
-                // Sort indices in descending order to avoid index shifting issues
-                indices.sort((a, b) => b - a);
-                indices.forEach(index => {
-                    assets.splice(index, 1);
-                });
-
-                updateAssetTable();
-                updateDashboard();
-                updateCharts();
-                alert('Selected assets deleted!');
-            }
-        }
-
-        function toggleSelectAll() {
-            const selectAll = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.asset-checkbox');
-            
-            checkboxes.forEach(cb => {
-                cb.checked = selectAll.checked;
-            });
-        }
-
-        // Asset management functions
-        function editAsset(index) {
-            const asset = assets[index];
-            // In a real application, you'd show a modal form here
-            const newName = prompt('Enter new asset name:', asset.name);
-            if (newName) {
-                asset.name = newName;
-                updateAssetTable();
-            }
-        }
-
-        function deleteAsset(index) {
-            if (confirm('Are you sure you want to delete this asset?')) {
-                assets.splice(index, 1);
-                updateAssetTable();
-                updateDashboard();
-                updateCharts();
-            }
-        }
-
-        function showAddAssetForm() {
-            // In a real application, you'd show a modal form here
-            const id = prompt('Enter Asset ID:');
-            if (!id) return;
-            
-            const name = prompt('Enter Asset Name:');
-            if (!name) return;
-            
-            const type = prompt('Enter Asset Type (Rotating, Fixed, Mobile, Electrical, Instrumentation):');
-            if (!type) return;
-            
-            const location = prompt('Enter Location:');
-            if (!location) return;
-
-            const newAsset = {
-                id: id,
-                name: name,
-                type: type,
-                location: location,
-                description: '',
-                manufacturer: '',
-                model: '',
-                installDate: '',
-                department: '',
-                scores: { safety: 5, environmental: 5, production: 5, financial: 5, quality: 5, reputation: 5 }
-            };
-
-            newAsset.criticality = calculateCriticality(newAsset.scores);
-            newAsset.tier = calculateTier(newAsset.criticality);
-
-            assets.push(newAsset);
-            updateAssetTable();
-            updateDashboard();
-            updateCharts();
-        }
-
-        // Filter functions
-        function filterAssets() {
-            const searchTerm = document.getElementById('searchAssets').value.toLowerCase();
-            const typeFilter = document.getElementById('filterType').value;
-            const criticalityFilter = document.getElementById('filterCriticality').value;
-
-            const rows = document.querySelectorAll('#assetTable tr');
-            
-            rows.forEach((row, index) => {
-                if (index >= assets.length) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\n');
+                const headers = lines[0].split(',');
                 
-                const asset = assets[index];
-                let show = true;
-
-                // Search filter
-                if (searchTerm && !asset.name.toLowerCase().includes(searchTerm) && 
-                    !asset.id.toLowerCase().includes(searchTerm) && 
-                    !asset.location.toLowerCase().includes(searchTerm)) {
-                    show = false;
+                const importedAssets = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        const values = lines[i].split(',');
+                        const asset = {
+                            id: values[0],
+                            name: values[1],
+                            type: values[2],
+                            location: values[3],
+                            description: values[4] || '',
+                            manufacturer: values[5] || '',
+                            model: values[6] || '',
+                            installDate: values[7] || '',
+                            safety: 5,
+                            environmental: 5,
+                            production: 5,
+                            financial: 5,
+                            quality: 5,
+                            reputation: 5,
+                            criticality: 0,
+                            tier: 3
+                        };
+                        importedAssets.push(asset);
+                    }
                 }
-
-                // Type filter
-                if (typeFilter && asset.type !== typeFilter) {
-                    show = false;
-                }
-
-                // Criticality filter
-                if (criticalityFilter && asset.tier.toString() !== criticalityFilter) {
-                    show = false;
-                }
-
-                row.style.display = show ? '' : 'none';
-            });
-        }
-
-        function updateCurrency() {
-            const currency = document.getElementById('currencySelect').value;
-            settings.currency = currency;
-            
-            // Update financial criteria descriptions to include currency symbol
-            const symbol = currencySymbols[currency];
-            const financialCriteria = settings.criteria.financial;
-            
-            // This would update financial impact descriptions with new currency
-            // For now, just store the currency setting
-            
-            alert(`Currency updated to ${currency} (${symbol})`);
-        }
-
-        // Initialize financial criteria with currency-specific values
-        function initializeFinancialCriteria() {
-            const currency = settings.currency;
-            const symbol = currencySymbols[currency];
-            
-            const baseCriteria = {
-                1: `No financial impact`,
-                2: `Minor cost (<${symbol}1,000)`,
-                3: `Low financial impact (${symbol}1,000-${symbol}10,000)`,
-                4: `Moderate impact (${symbol}10,000-${symbol}50,000)`,
-                5: `Significant impact (${symbol}50,000-${symbol}100,000)`,
-                6: `High impact (${symbol}100,000-${symbol}500,000)`,
-                7: `Major impact (${symbol}500,000-${symbol}1M)`,
-                8: `Severe impact (${symbol}1M-${symbol}5M)`,
-                9: `Critical impact (${symbol}5M-${symbol}10M)`,
-                10: `Catastrophic impact (>${symbol}10M)`
+                
+                assets = assets.concat(importedAssets);
+                calculateCriticality();
+                updateDashboard();
+                updateAssessmentTable();
+                
+                alert(`Successfully imported ${importedAssets.length} assets.`);
             };
             
-            settings.criteria.financial = baseCriteria;
+            reader.readAsText(file);
         }
 
-        // Load settings from localStorage on startup
-        function loadSettings() {
-            const saved = localStorage.getItem('criticalitySettings');
-            if (saved) {
-                settings = { ...settings, ...JSON.parse(saved) };
-                
-                // Update UI with loaded settings
-                Object.entries(settings.weights).forEach(([criteria, value]) => {
-                    const slider = document.getElementById(`${criteria}Weight`);
-                    const valueSpan = document.getElementById(`${criteria}WeightValue`);
-                    if (slider && valueSpan) {
-                        slider.value = value;
-                        valueSpan.textContent = value + '%';
+        // Assessment Functions
+        function bulkAssess() {
+            const selectedCheckboxes = document.querySelectorAll('#assessmentTableBody input[type="checkbox"]:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                alert('Please select assets to assess.');
+                return;
+            }
+
+            const safetyScore = prompt('Enter Safety score (1-10) for selected assets:');
+            const environmentalScore = prompt('Enter Environmental score (1-10) for selected assets:');
+            const productionScore = prompt('Enter Production score (1-10) for selected assets:');
+            
+            if (safetyScore && environmentalScore && productionScore) {
+                selectedCheckboxes.forEach(checkbox => {
+                    const assetId = checkbox.getAttribute('data-asset-id');
+                    const asset = assets.find(a => a.id === assetId);
+                    
+                    if (asset) {
+                        asset.safety = parseInt(safetyScore);
+                        asset.environmental = parseInt(environmentalScore);
+                        asset.production = parseInt(productionScore);
                     }
                 });
+                
+                calculateCriticality();
+                updateDashboard();
+                updateAssessmentTable();
             }
         }
 
-        // Call loadSettings and initializeFinancialCriteria after DOM load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSettings();
-            initializeFinancialCriteria();
-        });
+        // Report Generation
+        function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+            const companyName = document.getElementById('companyName').value || 'Your Company';
+            const includeAssets = document.querySelector('input[name="includeAssets"]:checked').value;
+            
+            let reportAssets = assets;
+            if (includeAssets === 'critical') {
+                reportAssets = assets.filter(a => a.tier === 1);
+            } else if (includeAssets === 'selected') {
+                const selectedIds = Array.from(document.querySelectorAll('#assessmentTableBody input[type="checkbox"]:checked'))
+                    .map(cb => cb.getAttribute('data-asset-id'));
+                reportAssets = assets.filter(a => selectedIds.includes(a.id));
+            }
+
+            // Generate PDF using jsPDF (simplified version)
+            const pdf = new jsPDF();
+            
+            // Add title
+            pdf.setFontSize(20);
+            pdf.text(`${companyName} - Criticality Assessment Report`, 20, 30);
+            
+            // Add date
+            pdf.setFontSize(12);
+            pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 50);
+            
+            // Add summary
+            pdf.text(`Total Assets: ${reportAssets.length}`, 20, 70);
+            pdf.text(`Critical Assets (Tier 1): ${reportAssets.filter(a => a.tier === 1).length}`, 20, 80);
+            pdf.text(`High Priority Assets (Tier 2): ${reportAssets.filter(a => a.tier === 2).length}`, 20, 90);
+            
+            // Add asset list
+            let yPosition = 110;
+            pdf.text('Asset Details:', 20, yPosition);
+            yPosition += 10;
+            
+            reportAssets.slice(0, 20).forEach(asset => {
+                pdf.text(`${asset.id} - ${asset.name} (Tier ${asset.tier})`, 20, yPosition);
+                yPosition += 10;
+                
+                if (yPosition > 250) {
+                    pdf.addPage();
+                    yPosition = 30;
+                }
+            });
+            
+            // Save the PDF
+            pdf.save(`criticality-assessment-${Date.now()}.pdf`);
+        }
     </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"953e912f19f87015","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.6.2","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"953ea4157c2302a3","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.6.2","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
     <script id="html_badge_script1">
         window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
-            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDp90mU%2F2PLp9E3RQGZTbs2krcJVfYBNrb%2BEpoBVMAN7fF1s35MgmyYnWGWBIhgmu5ee9JfZC9n9EBXZocm%2FE3iEKmy32cBYh4i9IKcx7RnxPAASPSatahYjZcXuKA8UgSfsLIc2ZaAoE9zaqruBzNuXQVEarndGBax3NcNiQ73ZkaGKodgy3gaZySfA60jhkPALuCgyJSbughLCYzuIey%2BtQ0zToqbn2FFKgg7rU7r1VkEAkOmxUD2XaeIswmZ0wGUB%2Fs%2BDIffmq0B6eGPMhCxmDjpS5dyc7x9stNT8y9IFKK8M4rNFVgBxPiXyWG%2FEenB3fm3wetkjjunIbSaQ7jHdeI%2FKyLapb5eV%2FN5qYYJ5RaxL0Lc3FwA%2FByB8cGQq8PqfynhbPxXJMC7c6ehazshVC892gnrxj0DFQyWQSUUzODoW%2Bel9t6jmJpUxxe0rLcMKCWquuT4AJDTbBQTtvgz3qMWZ7DJiP%2FYKHku4wq1%2Bk8LiHJwOgPtIILadBwVzOSo32dbuTS4C89dtCAyt3B24%3D";
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDgalN1pLT3z%2FvFOjangDe3%2Bj9Z2H9P94YVDKJ%2ButLOObbZjx%2BtUEE2%2BblDSAHqbbdJ%2BN%2FaPSd2SLkOarvqRCN35tyJHBWcvlWvYdrVnOUA%2FHdRPPalvfuZAT24SAXPdrI%2FUalpI%2BLN5nD3xSnf%2FsNaPs8GuVzwb%2FazAzZw1xVq4fFmcdOTORYNVNJgxVqOO5m1Y20%2B1T0qxESQHAsV7%2BksWRChP03m1V7y01ijAJHuVwLVz11ng0HoK2CdgvTjUY0vlmcrzLnIEu3NAkjKfqgw2CG9HP%2FaQepnxWbBkUevQNvzqvpCoyc30DLDqoY6542%2FU365sGIyIGrB0nSq7BXMlIq1PsGUBkg0qUkbF6XcFfZi0GUwa1XGuR0GswtGSXCBS3XzOahdthiCuSg%2FvMHK5Mfu45W3oov%2FKZdqimo6lkn2ZEEbGEvZE6N57KUkI2C%2Begv3xRv0T2l2HGGEnGfEv7u4MoHzGzOqWeKy8E6A8GJTu9B9VX6oUWBxOk6F2gW%2BRLZtY5N4wzH6xh41ZaIf1wiUi6HZIBt5YPo8dGVeT5";
         window.__genspark_locale = "en-US";
-        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDp90mU/2PLp9E3RQGZTbs2krcJVfYBNrb+EpoBVMAN7fF1s35MgmyYnWGWBIhgmu5ee9JfZC9n9EBXZocm/E3iEKmy32cBYh4i9IKcx7RnxPAASPSatahYjZcXuKA8UgSfsLIc2ZaAoE9zaqruBzNuXQVEarndGBax3NcNiQ73ZkaGKodgy3gaZySfA60jhkPALuCgyJSbughLCYzuIey+tQ0zToqbn2FFKgg7rU7r1VkEAkOmxUD2XaeIswmZ0wGUB/s+DIffmq0B6eGPMhCxmDjpS5dyc7x9stNT8y9IFKK8M4rNFVgBxPiXyWG/EenB3fm3wetkjjunIbSaQ7jHdeI/KyLapb5eV/N5qYYJ5RaxL0Lc3FwA/ByB8cGQq8PqfynhbPxXJMC7c6ehazshVC892gnrxj0DFQyWQSUUzODoW+el9t6jmJpUxxe0rLcMKCWquuT4AJDTbBQTtvgz3qMWZ7DJiP/YKHku4wq1+k8LiHJwOgPtIILadBwVzOSo32dbuTS4C89dtCAyt3B24=";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDgalN1pLT3z/vFOjangDe3+j9Z2H9P94YVDKJ+utLOObbZjx+tUEE2+blDSAHqbbdJ+N/aPSd2SLkOarvqRCN35tyJHBWcvlWvYdrVnOUA/HdRPPalvfuZAT24SAXPdrI/UalpI+LN5nD3xSnf/sNaPs8GuVzwb/azAzZw1xVq4fFmcdOTORYNVNJgxVqOO5m1Y20+1T0qxESQHAsV7+ksWRChP03m1V7y01ijAJHuVwLVz11ng0HoK2CdgvTjUY0vlmcrzLnIEu3NAkjKfqgw2CG9HP/aQepnxWbBkUevQNvzqvpCoyc30DLDqoY6542/U365sGIyIGrB0nSq7BXMlIq1PsGUBkg0qUkbF6XcFfZi0GUwa1XGuR0GswtGSXCBS3XzOahdthiCuSg/vMHK5Mfu45W3oov/KZdqimo6lkn2ZEEbGEvZE6N57KUkI2C+egv3xRv0T2l2HGGEnGfEv7u4MoHzGzOqWeKy8E6A8GJTu9B9VX6oUWBxOk6F2gW+RLZtY5N4wzH6xh41ZaIf1wiUi6HZIBt5YPo8dGVeT5";
     </script>
     
     <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
